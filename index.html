@@ -27,6 +27,20 @@
             align-items: flex-start;
             min-height: 100vh;
             background-image: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            
+            /* منع تحديد النص في كامل الصفحة */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* السماح بتحديد النص داخل حقول الإدخال فقط ليتمكن الطالب من التعديل على إجابته */
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .container {
@@ -304,6 +318,24 @@
     </div>
 
     <script>
+        // 🚨 حماية الصفحة من الغش 🚨
+        
+        // 1. منع النقر بزر الماوس الأيمن
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // 2. منع اختصارات لوحة المفاتيح للنسخ واللصق والقص
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && (event.key === 'c' || event.key === 'v' || event.key === 'x' || event.key === 'C' || event.key === 'V' || event.key === 'X')) {
+                event.preventDefault();
+            }
+        });
+
+        // 3. منع أحداث النسخ واللصق والقص المباشرة
+        document.addEventListener('copy', event => event.preventDefault());
+        document.addEventListener('paste', event => event.preventDefault());
+        document.addEventListener('cut', event => event.preventDefault());
+
+
         // 🚨🚨🚨 رابط السكربت الخاص بك 🚨🚨🚨
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySwBY1zNiHN55KA6UVowKJqCcxEPGGlG8PWTLSQ9aoGGcWbxIzXuNrtpcl21ggajBFCQ/exec';
         
