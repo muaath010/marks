@@ -174,27 +174,54 @@
     </div>
 
     <script>
-        // 🚨 حماية الصفحة من الغش 🚨
+        // 🚨 حماية الصفحة من الغش (النظام الصارم) 🚨
+        
+        // 1. منع النقر بزر الماوس الأيمن
         document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // 2. منع اختصارات لوحة المفاتيح (النسخ، اللصق، القص، تحديد الكل، وأدوات المطور F12)
         document.addEventListener('keydown', function(event) {
-            if (event.ctrlKey && (event.key === 'c' || event.key === 'v' || event.key === 'x' || event.key === 'C' || event.key === 'V' || event.key === 'X')) {
+            // منع النسخ واللصق وتحديد الكل
+            if (event.ctrlKey && ['c', 'v', 'x', 'a', 'C', 'V', 'X', 'A'].includes(event.key)) {
+                event.preventDefault();
+            }
+            // منع فتح أدوات المطور (F12, Ctrl+Shift+I, Ctrl+U)
+            if (event.key === 'F12' || 
+               (event.ctrlKey && event.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(event.key)) || 
+               (event.ctrlKey && ['U', 'u'].includes(event.key))) {
                 event.preventDefault();
             }
         });
+
+        // 3. منع أحداث النسخ واللصق والقص المباشرة
         document.addEventListener('copy', event => event.preventDefault());
         document.addEventListener('paste', event => event.preventDefault());
         document.addEventListener('cut', event => event.preventDefault());
 
+        // 4. منع سحب وإفلات النصوص (Drag & Drop) لمنع سحب الأسئلة
+        document.addEventListener('dragstart', event => event.preventDefault());
+        document.addEventListener('drop', event => event.preventDefault());
+
+        // --- المتغيرات الأساسية للمنصة (لا تحذفها) ---
         const SCRIPT_URL = 'https://darkslateblue-wren-226762.hostingersite.com/api.php';
-        
         let currentQuestions = [];
         let studentsDirectory = {}; // كشف أسماء الطلاب الخاص بالمعلم
         let cheatCount = 0;
 
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden && document.getElementById('quiz-section').style.display === 'block') {
+        // 5. التشديد الصارم على الخروج من الصفحة (نافذة فقدت التركيز)
+        window.addEventListener("blur", () => {
+            // نتحقق أن الطالب في مرحلة الاختبار الفعلي وليس في شاشة الدخول
+            if (document.getElementById('quiz-section').style.display === 'block') {
                 cheatCount++;
-                alert("⚠️ تحذير: لقد قمت بالخروج من شاشة الاختبار! تم تسجيل هذه المحاولة وإرسالها للمعلم.");
+                let maxAttempts = 3; // عدد المحاولات المسموحة قبل سحب الاختبار
+                let remaining = maxAttempts - cheatCount;
+                
+                if (remaining > 0) {
+                    alert(`🚨 تحذير شديد: لقد قمت بالخروج من شاشة الاختبار أو فتح نافذة/تطبيق آخر!\n\nتم تسجيل هذه المحاولة كحالة غش (رقم ${cheatCount}).\n⚠️ تبقى لك (${remaining}) محاولات قبل أن يتم سحب الاختبار وتسليمه تلقائياً!`);
+                } else {
+                    alert("⛔ تم استنفاد جميع المحاولات! سيتم سحب الاختبار وتسليم إجاباتك الحالية تلقائياً.");
+                    submitAnswers(); // استدعاء دالة تسليم الاختبار إجبارياً
+                }
             }
         });
 
