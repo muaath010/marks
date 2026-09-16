@@ -97,6 +97,23 @@
         #loading { text-align: center; display: none; color: var(--primary-color); font-weight: bold; margin: 20px 0; font-size: 16px; }
         .alert-box { padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; display: none; }
         .alert-error { background-color: #fadbd8; color: #c0392b; border: 1px solid #f1948a; }
+
+        /* --- تصميم لعبة المطابقة التفاعلية --- */
+        .matching-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px; margin-top: 20px;
+        }
+        .match-card {
+            background: #ecf0f1; border: 2px solid #bdc3c7; color: #2c3e50;
+            padding: 20px 10px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; justify-content: center; align-items: center; min-height: 80px; text-align: center;
+        }
+        .match-card:hover { transform: translateY(-5px); border-color: #3498db; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2); }
+        .match-card.selected { background: #f1c40f; border-color: #f39c12; color: #fff; transform: scale(1.05); }
+        .match-card.matched { background: #27ae60; border-color: #2ecc71; color: #fff; transform: scale(0.9); opacity: 0.6; pointer-events: none; }
+        .match-card.wrong { background: #e74c3c; border-color: #c0392b; color: #fff; animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
     </style>
 </head>
 <body>
@@ -164,6 +181,15 @@
 
         <button class="btn-success" id="btn-submit" onclick="submitAnswers()">📤 تسليم الإجابات النهائية</button>
         <div id="submit-loading" style="display:none; text-align:center; font-weight:bold; margin-top:15px; color:#27ae60; font-size: 16px;">⏳ جاري إرسال الإجابات للمعلم بأمان...</div>
+    </div>
+
+    <!-- قسم اللعبة التفاعلية -->
+    <div class="container" id="game-section" style="display: none; max-width: 800px;">
+        <div class="header">
+            <h1 id="gameTitle" style="color: #8e44ad;">🎮 عنوان اللعبة</h1>
+            <p>لعبة مطابقة تفاعلية</p>
+        </div>
+        <div id="gameArea" class="matching-grid"></div>
     </div>
 
     <!-- رسالة النجاح -->
@@ -246,6 +272,12 @@
                     if (data.status === "success") {
                         document.getElementById('fetchedQuizName').innerText = data.quizName;
                         currentQuestions = data.questions;
+                        // التحقق إذا كان الكود للعبة تفاعلية
+                        if (code.startsWith('G-') || (currentQuestions[0] && currentQuestions[0].type === 'matching')) {
+                            document.getElementById('loading').style.display = 'none';
+                            startInteractiveGame(data.quizName, currentQuestions);
+                            return; // نوقف مسار الاختبار العادي هنا
+                        }
                         
                         // بعد إيجاد الاختبار، نقوم بجلب قائمة طلاب المعلم الذي أنشأه
                         fetchTeacherStudents(data.teacher_id);
@@ -425,6 +457,71 @@
                 btn.style.display = 'block';
                 loading.style.display = 'none';
             });
+        }
+
+        // --- دوال الألعاب التفاعلية ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(freq, type, duration) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
+
+        let firstCard = null; let matchedCount = 0; let totalPairs = 0;
+
+        function startInteractiveGame(title, items) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('game-section').style.display = 'block';
+            document.getElementById('gameTitle').innerText = "🎮 " + title;
+
+            let cardsArray = []; totalPairs = items.length; matchedCount = 0;
+            items.forEach((item, index) => {
+                cardsArray.push({ text: item.word, id: index, type: 'word' });
+                cardsArray.push({ text: item.def, id: index, type: 'def' });
+            });
+            cardsArray = cardsArray.sort(() => Math.random() - 0.5); // خلط عشوائي
+
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = "";
+            
+            cardsArray.forEach((card) => {
+                let div = document.createElement('div');
+                div.className = 'match-card'; div.innerText = card.text;
+                div.dataset.id = card.id; div.dataset.type = card.type;
+                div.onclick = () => handleCardClick(div);
+                gameArea.appendChild(div);
+            });
+            playSound(600, 'triangle', 0.1);
+        }
+
+        function handleCardClick(card) {
+            if(card.classList.contains('matched') || card.classList.contains('selected')) return;
+            card.classList.add('selected'); playSound(800, 'sine', 0.1);
+
+            if(!firstCard) {
+                firstCard = card;
+            } else {
+                let secondCard = card;
+                if(firstCard.dataset.id === secondCard.dataset.id && firstCard.dataset.type !== secondCard.dataset.type) {
+                    setTimeout(() => {
+                        firstCard.classList.replace('selected', 'matched');
+                        secondCard.classList.replace('selected', 'matched');
+                        playSound(1200, 'sine', 0.2); firstCard = null; matchedCount++;
+                        if(matchedCount === totalPairs) {
+                            setTimeout(() => { playSound(500, 'triangle', 0.5); alert("🎉 رائع جداً! لقد أكملت اللعبة بنجاح."); location.reload(); }, 500);
+                        }
+                    }, 300);
+                } else {
+                    firstCard.classList.add('wrong'); secondCard.classList.add('wrong');
+                    playSound(150, 'sawtooth', 0.3);
+                    setTimeout(() => {
+                        firstCard.classList.remove('selected', 'wrong'); secondCard.classList.remove('selected', 'wrong'); firstCard = null;
+                    }, 500);
+                }
+            }
         }
     </script>
 </body>
