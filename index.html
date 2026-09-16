@@ -259,7 +259,7 @@
         }
 
         // 1. التحقق من الرمز وجلب بيانات الاختبار والمعلم
-        function verifyQuizCode() {
+       function verifyQuizCode() {
             const code = document.getElementById('quizCode').value.trim().toUpperCase();
             if (!code) return showAlert("الرجاء إدخال رمز الاختبار.");
 
@@ -272,12 +272,6 @@
                     if (data.status === "success") {
                         document.getElementById('fetchedQuizName').innerText = data.quizName;
                         currentQuestions = data.questions;
-                        // التحقق إذا كان الكود للعبة تفاعلية
-                        if (code.startsWith('G-') || (currentQuestions[0] && currentQuestions[0].type === 'matching')) {
-                            document.getElementById('loading').style.display = 'none';
-                            startInteractiveGame(data.quizName, currentQuestions);
-                            return; // نوقف مسار الاختبار العادي هنا
-                        }
                         
                         // بعد إيجاد الاختبار، نقوم بجلب قائمة طلاب المعلم الذي أنشأه
                         fetchTeacherStudents(data.teacher_id);
@@ -293,7 +287,6 @@
                     showAlert("حدث خطأ في الاتصال. تأكد من الإنترنت وحاول مجدداً.");
                 });
         }
-
         // 2. جلب قوائم الطلاب الخاصة بالمعلم
         function fetchTeacherStudents(teacherId) {
             fetch(`${SCRIPT_URL}?action=getStudentDirectory&teacher_id=${teacherId}`)
