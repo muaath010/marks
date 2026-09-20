@@ -125,7 +125,16 @@
         .sort-box:hover { border-color: #2ecc71; background: #f9fffb; }
         .box-title { font-weight: bold; color: #2c3e50; text-align: center; margin-bottom: 10px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; width: 100%; font-size: 18px; }
 
-        
+        /* --- تصميم لعبة الترتيب المنطقي (Sequence) --- */
+        .sequence-layout { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; text-align: right;}
+        .seq-pool { display: flex; flex-direction: column; gap: 10px; background: #eaf2f8; padding: 20px; border-radius: 12px; border: 2px dashed #3498db; min-height: 60px; }
+        .seq-slots { display: flex; flex-direction: column; gap: 10px; counter-reset: seq-counter; }
+        .seq-item { background: #3498db; color: white; padding: 15px 25px 15px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; user-select: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
+        .seq-item:hover { transform: translateX(-5px); box-shadow: 5px 5px 15px rgba(52, 152, 219, 0.3); }
+        .seq-slot { background: white; border: 2px dashed #bdc3c7; border-radius: 10px; min-height: 54px; display: flex; align-items: center; position: relative; transition: 0.3s; }
+        .seq-slot::before { counter-increment: seq-counter; content: counter(seq-counter); position: absolute; right: -15px; top: 50%; transform: translateY(-50%); background: #f39c12; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;}
+        .seq-slot .seq-item { margin: 0; width: 100%; box-sizing: border-box; background: #2c3e50; }
+        .seq-item.wrong-seq { background: #e74c3c !important; animation: shake 0.4s; }
     </style>
 </head>
 <body>
@@ -387,7 +396,11 @@
                     startMatchingGame(title, currentQuestions); // تشغيل المطابقة
                 } else if (gameType === 'sorting') {
                     startSortingGame(title, currentQuestions); // تشغيل الفرز
-                } else {
+                } 
+                 else if (gameType === 'sequence') {
+                    startSequenceGame(title, currentQuestions); 
+                     }// تشغيل الترتيب
+                else {
                     alert("⏳ هذا القالب من الألعاب قيد البرمجة وسيتم إطلاقه قريباً!");
                     location.reload();
                 }
@@ -534,7 +547,7 @@
                         secondCard.classList.replace('selected', 'matched');
                         playSound(1200, 'sine', 0.2); firstCard = null; matchedCount++;
                         if(matchedCount === totalPairs) {
-                            setTimeout(() => { playSound(500, 'triangle', 0.5); alert("🎉 رائع جداً! لقد أكملت اللعبة بنجاح."); location.reload(); }, 500);
+                           setTimeout(() => { playSound(500, 'triangle', 0.5); alert("🎉 رائع جداً! لقد أكملت اللعبة بنجاح."); submitGameSuccess(); }, 500);
                         }
                     }, 300);
                 } else {
@@ -612,7 +625,7 @@
                         if(sortedCount === items.length) {
                             setTimeout(() => { 
                                 playSound(500, 'triangle', 0.5); 
-                                alert("🎉 رائع جداً! لقد أنهيت عملية الفرز بنجاح مبهر!"); 
+                                alert("🎉 رائع جداً! لقد أنهيت عملية الفرز بنجاح مبهر!"); submitGameSuccess(); 
                                 location.reload(); 
                             }, 500);
                         }
@@ -627,6 +640,131 @@
             });
             playSound(600, 'triangle', 0.1);
         }
+        // دالة مخصصة لإرسال نتيجة الألعاب التفاعلية للمعلم
+        function submitGameSuccess() {
+            let gameTitle = document.getElementById('gameTitle').innerText;
+            
+            const payload = {
+                action: "submit",
+                studentName: document.getElementById('selStudentName').value,
+                grade: document.getElementById('selGrade').value,
+                section: document.getElementById('selSection').value,
+                studentId: document.getElementById('quizCode').value.toUpperCase(),
+                cheatCount: 0, // الألعاب التفاعلية لا تحتسب فيها محاولات الخروج كغش حالياً
+                answers: [
+                    { question: "نوع النشاط والتفاصيل", answer: "🎮 " + gameTitle },
+                    { question: "حالة الإنجاز", answer: "✅ اجتاز الطالب اللعبة بنجاح كامل 100%" }
+                ]
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // إخفاء شاشة اللعبة وإظهار رسالة النجاح الأنيقة
+                document.getElementById('game-section').style.display = 'none';
+                document.getElementById('success-section').style.display = 'block';
+            })
+            .catch(error => {
+                alert("تم إنهاء اللعبة، لكن حدث خطأ في إرسال النتيجة للمعلم.");
+                location.reload();
+            });
+        }
+            // --- 3. لعبة الترتيب المنطقي (Sequence) ---
+        function startSequenceGame(title, items) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('game-section').style.display = 'block';
+            document.getElementById('gameTitle').innerText = "🔢 " + title;
+
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <div style="color:#7f8c8d; font-weight:bold; margin-bottom:10px; text-align:center;">👈 اضغط على الخطوات لترتيبها بالتسلسل الصحيح</div>
+                <div class="sequence-layout">
+                    <div class="seq-pool" id="seqPool"></div>
+                    <div class="seq-slots" id="seqSlots"></div>
+                </div>
+                <button id="btnCheckSeq" onclick="checkSequence()" style="display:none; background:#8e44ad; color:white; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:18px; cursor:pointer; width:100%; margin-top:20px; box-shadow:0 4px 10px rgba(142, 68, 173, 0.3);">تحقق من الإجابة ✅</button>
+            `;
+
+            let pool = document.getElementById('seqPool');
+            let slotsContainer = document.getElementById('seqSlots');
+
+            // 1. إنشاء الأماكن الفارغة (Slots) المرقمة
+            items.forEach((_, i) => {
+                let slot = document.createElement('div');
+                slot.className = 'seq-slot';
+                slotsContainer.appendChild(slot);
+            });
+
+            // 2. خلط الخطوات (نعتمد الترتيب الذي أدخله المعلم كـ Original Index)
+            // ندمج المصطلح والتعريف ليظهر كخطوة واحدة واضحة
+            let shuffled = items.map((item, index) => ({ text: item.word + " : " + item.def, originalIndex: index }))
+                                .sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(item => {
+                let el = document.createElement('div');
+                el.className = 'seq-item';
+                el.innerText = item.text;
+                el.dataset.correctIndex = item.originalIndex;
+                
+                // حركة النقل بين المسبح والأماكن المرقمة
+                el.onclick = function() {
+                    let slots = document.querySelectorAll('.seq-slot');
+                    playSound(800, 'sine', 0.1);
+                    
+                    if(this.parentElement === pool) {
+                        // نقل للأسفل
+                        for(let slot of slots) {
+                            if(slot.children.length === 0) { slot.appendChild(this); break; }
+                        }
+                    } else {
+                        // إعادة للأعلى (إلغاء التحديد)
+                        pool.appendChild(this);
+                    }
+                    
+                    // إظهار زر "التحقق" فقط إذا امتلأت كل الخانات
+                    let allFilled = Array.from(slots).every(slot => slot.children.length > 0);
+                    document.getElementById('btnCheckSeq').style.display = allFilled ? 'block' : 'none';
+                };
+                pool.appendChild(el);
+            });
+            playSound(600, 'triangle', 0.1);
+        }
+
+        // دالة التحقق من صحة الترتيب
+        window.checkSequence = function() {
+            let slots = document.querySelectorAll('.seq-slot');
+            let isWin = true;
+
+            slots.forEach((slot, index) => {
+                let item = slot.children[0];
+                if(parseInt(item.dataset.correctIndex) === index) {
+                    item.style.background = '#27ae60'; // أخضر للصح
+                } else {
+                    isWin = false;
+                    item.classList.add('wrong-seq'); // أحمر واهتزاز للخطأ
+                    playSound(150, 'sawtooth', 0.3);
+                    setTimeout(() => {
+                        item.classList.remove('wrong-seq');
+                        item.style.background = '#3498db';
+                        document.getElementById('seqPool').appendChild(item); // طرده للأعلى ليعيد المحاولة
+                        document.getElementById('btnCheckSeq').style.display = 'none';
+                    }, 800);
+                }
+            });
+
+            if(isWin) {
+                playSound(1200, 'sine', 0.2);
+                setTimeout(() => { 
+                    playSound(500, 'triangle', 0.5); 
+                    alert("🎉 عبقري! لقد قمت بترتيب الخطوات بشكل صحيح 100%!"); submitGameSuccess(); 
+                    location.reload(); 
+                }, 500);
+            }
+        };
     </script>
 </body>
 </html>
