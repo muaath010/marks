@@ -391,7 +391,8 @@
         }
 
         // 4. الدخول للاختبار الفعلي
-       function startQuizUI() {
+       // 4. الدخول للاختبار الفعلي
+        function startQuizUI() {
             const selName = document.getElementById('selStudentName').value;
             const selGrade = document.getElementById('selGrade').value;
             const selSection = document.getElementById('selSection').value;
@@ -403,7 +404,8 @@
             // 🛑 الفلتر الذكي (موزع الألعاب): هل هو اختبار عادي أم لعبة تفاعلية؟
             let quizCode = document.getElementById('quizCode').value.trim().toUpperCase();
             if (quizCode.startsWith('G-')) {
-                let gameType = currentQuestions[0].type || 'matching'; // نوع اللعبة
+                // استخدام السطر الآمن لمنع الأعطال إذا كانت اللعبة فارغة
+                let gameType = (currentQuestions && currentQuestions[0] && currentQuestions[0].type) ? currentQuestions[0].type : 'matching'; 
                 let title = document.getElementById('fetchedQuizName').innerText;
                 
                 if (gameType === 'matching') {
