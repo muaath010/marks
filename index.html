@@ -456,36 +456,6 @@
                 wrapper.innerHTML += questionHTML;
             });
         }
-            // إذا كان اختباراً عادياً، نظهر شاشة الاختبار المعتادة
-            document.getElementById('quiz-section').style.display = 'block';
-            document.getElementById('display-quiz-name').innerText = document.getElementById('fetchedQuizName').innerText;
-            document.getElementById('display-student-name').innerText = selName;
-            document.getElementById('display-student-class').innerText = `الصف ${selGrade} / شعبة ${selSection}`;
-
-            const wrapper = document.getElementById('questions-wrapper');
-            wrapper.innerHTML = "";
-
-            currentQuestions.forEach((q, index) => {
-                let questionHTML = `<div class="question-card"><div class="question-title">${index + 1}. ${q.question}</div>`;
-
-                if (q.type === 'mcq') {
-                    questionHTML += `<div class="options-container">`;
-                    q.options.forEach((opt) => {
-                        questionHTML += `<label class="option-label"><input type="radio" name="q_${index}" value="${opt}">${opt}</label>`;
-                    });
-                    questionHTML += `</div>`;
-                } 
-                else if (q.type === 'long') {
-                    questionHTML += `<textarea id="q_${index}" rows="4" placeholder="اكتب إجابتك هنا بتفصيل..."></textarea>`;
-                } 
-                else {
-                    questionHTML += `<input type="text" id="q_${index}" placeholder="إجابة قصيرة...">`;
-                }
-
-                questionHTML += `</div>`;
-                wrapper.innerHTML += questionHTML;
-            });
-        }
 
         // 5. تسليم الإجابات
         function submitAnswers() {
