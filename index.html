@@ -135,6 +135,20 @@
         .seq-slot::before { counter-increment: seq-counter; content: counter(seq-counter); position: absolute; right: -15px; top: 50%; transform: translateY(-50%); background: #f39c12; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;}
         .seq-slot .seq-item { margin: 0; width: 100%; box-sizing: border-box; background: #2c3e50; }
         .seq-item.wrong-seq { background: #e74c3c !important; animation: shake 0.4s; }
+
+        /* --- تصميم لعبة إنقاذ رائد الفضاء (Spaceman) --- */
+        .spaceman-layout { text-align: center; margin-top: 20px; }
+        .oxygen-container { background: #ecf0f1; border-radius: 20px; width: 100%; height: 35px; border: 3px solid #bdc3c7; margin-bottom: 25px; overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
+        .oxygen-bar { background: #3498db; width: 100%; height: 100%; transition: width 0.4s ease, background-color 0.4s ease; }
+        .oxygen-text { position: absolute; width: 100%; top: 6px; text-align: center; font-weight: bold; color: #fff; font-size: 16px; z-index: 2; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .word-display { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 30px 0; direction: rtl; }
+        .letter-box { width: 45px; height: 55px; border-bottom: 4px solid #2c3e50; display: flex; justify-content: center; align-items: flex-end; font-size: 32px; font-weight: bold; color: #900C3F; padding-bottom: 5px; text-transform: uppercase; }
+        .hint-box { background: #fff3cd; padding: 20px; border-radius: 12px; border: 2px dashed #f1c40f; font-size: 18px; font-weight: bold; color: #856404; margin-bottom: 25px; line-height: 1.6; }
+        .keyboard { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; direction: rtl; }
+        .key-btn { background: #fff; border: 2px solid #bdc3c7; border-radius: 8px; padding: 12px 15px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 3px 5px rgba(0,0,0,0.1); color: #2c3e50; }
+        .key-btn:hover { background: #ecf0f1; transform: translateY(-3px); }
+        .key-btn.correct { background: #27ae60; color: white; border-color: #2ecc71; pointer-events: none; }
+        .key-btn.wrong { background: #e74c3c; color: white; border-color: #c0392b; pointer-events: none; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -377,12 +391,12 @@
         }
 
         // 4. الدخول للاختبار الفعلي
-        function startQuizUI() {
+       function startQuizUI() {
             const selName = document.getElementById('selStudentName').value;
             const selGrade = document.getElementById('selGrade').value;
             const selSection = document.getElementById('selSection').value;
 
-           if(!selName) return showAlert("الرجاء اختيار اسمك من القائمة للبدء.");
+            if(!selName) return showAlert("الرجاء اختيار اسمك من القائمة للبدء.");
 
             document.getElementById('login-section').style.display = 'none';
 
@@ -393,20 +407,53 @@
                 let title = document.getElementById('fetchedQuizName').innerText;
                 
                 if (gameType === 'matching') {
-                    startMatchingGame(title, currentQuestions); // تشغيل المطابقة
+                    startMatchingGame(title, currentQuestions); // 1. تشغيل المطابقة
                 } else if (gameType === 'sorting') {
-                    startSortingGame(title, currentQuestions); // تشغيل الفرز
-                } 
-                 else if (gameType === 'sequence') {
-                    startSequenceGame(title, currentQuestions); 
-                     }// تشغيل الترتيب
-                else {
+                    startSortingGame(title, currentQuestions); // 2. تشغيل الفرز
+                } else if (gameType === 'sequence') {
+                    startSequenceGame(title, currentQuestions); // 3. تشغيل الترتيب
+                } else if (gameType === 'spaceman') {
+                    startSpacemanGame(title, currentQuestions); // 4. تشغيل رائد الفضاء
+                } else {
                     alert("⏳ هذا القالب من الألعاب قيد البرمجة وسيتم إطلاقه قريباً!");
                     location.reload();
                 }
-                return; 
+                return; // 🛑 إيقاف الكود هنا لمنع ظهور شاشة الاختبار العادي
             }
 
+            // ==========================================
+            // 👇 إذا لم يكن الكود يبدأ بـ G- سيتم تشغيل الاختبار العادي 👇
+            // ==========================================
+            
+            document.getElementById('quiz-section').style.display = 'block';
+            document.getElementById('display-quiz-name').innerText = document.getElementById('fetchedQuizName').innerText;
+            document.getElementById('display-student-name').innerText = selName;
+            document.getElementById('display-student-class').innerText = `الصف ${selGrade} / شعبة ${selSection}`;
+
+            const wrapper = document.getElementById('questions-wrapper');
+            wrapper.innerHTML = "";
+
+            currentQuestions.forEach((q, index) => {
+                let questionHTML = `<div class="question-card"><div class="question-title">${index + 1}. ${q.question}</div>`;
+
+                if (q.type === 'mcq') {
+                    questionHTML += `<div class="options-container">`;
+                    q.options.forEach((opt) => {
+                        questionHTML += `<label class="option-label"><input type="radio" name="q_${index}" value="${opt}">${opt}</label>`;
+                    });
+                    questionHTML += `</div>`;
+                } 
+                else if (q.type === 'long') {
+                    questionHTML += `<textarea id="q_${index}" rows="4" placeholder="اكتب إجابتك هنا بتفصيل..."></textarea>`;
+                } 
+                else {
+                    questionHTML += `<input type="text" id="q_${index}" placeholder="إجابة قصيرة...">`;
+                }
+
+                questionHTML += `</div>`;
+                wrapper.innerHTML += questionHTML;
+            });
+        }
             // إذا كان اختباراً عادياً، نظهر شاشة الاختبار المعتادة
             document.getElementById('quiz-section').style.display = 'block';
             document.getElementById('display-quiz-name').innerText = document.getElementById('fetchedQuizName').innerText;
@@ -765,6 +812,160 @@
                 }, 500);
             }
         };
+        // --- 4. لعبة إنقاذ رائد الفضاء (Spaceman) ---
+        let smItems = [];
+        let smCurrentIndex = 0;
+        let smWord = "";
+        let smGuessed = [];
+        let smWrongCount = 0;
+        const smMaxWrong = 6; // عدد الأخطاء المسموحة قبل نفاد الأكسجين
+
+        function startSpacemanGame(title, items) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('game-section').style.display = 'block';
+            document.getElementById('gameTitle').innerText = "👨‍🚀 " + title;
+            
+            smItems = items;
+            smCurrentIndex = 0;
+            loadSpacemanWord();
+        }
+
+        function loadSpacemanWord() {
+            // التحقق من الفوز بجميع الكلمات
+            if (smCurrentIndex >= smItems.length) {
+                setTimeout(() => { 
+                    playSound(500, 'triangle', 0.5); 
+                    alert("🎉 مهمة ناجحة! لقد أنقذت رائد الفضاء وأكملت جميع المصطلحات بنجاح!"); 
+                    submitGameSuccess(); // إرسال النتيجة للمعلم
+                }, 500);
+                return;
+            }
+            
+            // تهيئة الكلمة الحالية
+            smWord = smItems[smCurrentIndex].word.trim().toLowerCase();
+            let def = smItems[smCurrentIndex].def;
+            smGuessed = [];
+            smWrongCount = 0;
+            
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <div class="spaceman-layout">
+                    <div class="hint-box">💡 <b>تلميح:</b> ${def}</div>
+                    
+                    <div class="oxygen-container">
+                        <div class="oxygen-bar" id="oxygenBar"></div>
+                        <div class="oxygen-text" id="oxygenText">مستوى الأكسجين: 100%</div>
+                    </div>
+                    
+                    <div class="word-display" id="wordDisplay"></div>
+                    <div class="keyboard" id="keyboard"></div>
+                    
+                    <div style="font-weight:bold; color:#7f8c8d; margin-top:20px; font-size:14px;">
+                        المصطلح ( ${smCurrentIndex + 1} ) من أصل ( ${smItems.length} )
+                    </div>
+                </div>
+            `;
+            
+            updateSpacemanDisplay();
+            buildKeyboard();
+            updateOxygen();
+            playSound(600, 'triangle', 0.1);
+        }
+
+        function updateSpacemanDisplay() {
+            const display = document.getElementById('wordDisplay');
+            display.innerHTML = "";
+            let allGuessed = true;
+            
+            for (let i = 0; i < smWord.length; i++) {
+                let char = smWord[i];
+                let box = document.createElement('div');
+                
+                // تجاوز المسافات والرموز لتسهيل اللعبة
+                if (char === " " || char === "-") {
+                    box.style.border = "none";
+                    box.style.width = "20px";
+                    box.innerText = char === "-" ? "-" : "";
+                } else {
+                    box.className = "letter-box";
+                    if (smGuessed.includes(char)) {
+                        box.innerText = char;
+                    } else {
+                        box.innerText = "";
+                        allGuessed = false; // لا يزال هناك حروف مفقودة
+                    }
+                }
+                display.appendChild(box);
+            }
+            
+            // إذا خمن الكلمة بالكامل
+            if (allGuessed) {
+                playSound(1200, 'sine', 0.2);
+                document.getElementById('keyboard').style.pointerEvents = "none"; // تعطيل الكيبورد
+                setTimeout(() => {
+                    smCurrentIndex++;
+                    loadSpacemanWord(); // الانتقال للكلمة التالية
+                }, 1500);
+            }
+        }
+
+        function buildKeyboard() {
+            const kb = document.getElementById('keyboard');
+            // الحروف العربية الأساسية
+            let lettersArray = "ابتثجحخدذرزسشصضطظعغفقكلمنهويأإآؤئءةى".split("");
+            
+            // إضافة الحروف الإنجليزية إذا كان المصطلح يحتوي عليها
+            if (/[a-z]/.test(smWord)) {
+                lettersArray = lettersArray.concat("abcdefghijklmnopqrstuvwxyz".split(""));
+            }
+            
+            lettersArray.forEach(l => {
+                let btn = document.createElement('button');
+                btn.className = "key-btn";
+                btn.innerText = l;
+                btn.onclick = () => handleSpacemanGuess(l, btn);
+                kb.appendChild(btn);
+            });
+        }
+
+        function handleSpacemanGuess(letter, btn) {
+            if (smWord.includes(letter)) {
+                smGuessed.push(letter);
+                btn.classList.add('correct');
+                playSound(800, 'sine', 0.1);
+                updateSpacemanDisplay();
+            } else {
+                smWrongCount++;
+                btn.classList.add('wrong');
+                playSound(150, 'sawtooth', 0.3);
+                updateOxygen();
+                
+                // حالة الخسارة للكلمة الحالية
+                if (smWrongCount >= smMaxWrong) {
+                    document.getElementById('keyboard').style.pointerEvents = "none";
+                    setTimeout(() => {
+                        alert("❌ نفد الأكسجين تماماً!\nالإجابة الصحيحة كانت: ( " + smWord.toUpperCase() + " )\nسنقوم بإعادة تعبئة الأكسجين لتعيد المحاولة.");
+                        loadSpacemanWord(); // إعادة نفس الكلمة ليتعلم منها
+                    }, 500);
+                }
+            }
+        }
+
+        function updateOxygen() {
+            let oxygenPercent = Math.max(0, 100 - (smWrongCount * (100 / smMaxWrong)));
+            const bar = document.getElementById('oxygenBar');
+            document.getElementById('oxygenText').innerText = `مستوى الأكسجين: ${Math.round(oxygenPercent)}%`;
+            bar.style.width = oxygenPercent + "%";
+            
+            // تغيير لون الأكسجين حسب المستوى
+            if (oxygenPercent > 50) {
+                bar.style.background = "#3498db"; // أزرق آمن
+            } else if (oxygenPercent > 20) {
+                bar.style.background = "#f39c12"; // برتقالي تحذير
+            } else {
+                bar.style.background = "#e74c3c"; // أحمر خطر
+            }
+        }
     </script>
 </body>
 </html>
