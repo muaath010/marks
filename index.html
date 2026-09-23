@@ -155,22 +155,20 @@
 
     <div class="container" id="login-section">
         <div class="header">
-            <h1>منصة مِحور - بوابة الاختبارات</h1>
+            <h1>منصة مِحور - بوابة الاختبارات والأنشطة</h1>
             <p id="header-desc">أدخل رمز الاختبار للبدء</p>
         </div>
 
         <div id="login-alert" class="alert-box alert-error"></div>
 
-        <!-- الخطوة الأولى: إدخال الرمز -->
         <div id="step1-code">
             <div class="form-group" style="margin-top: 10px;">
-                <label style="text-align: center; color: var(--primary-color); font-size: 18px;">🔑 رمز الاختبار:</label>
+                <label style="text-align: center; color: var(--primary-color); font-size: 18px;">🔑 رمز الاختبار / اللعبة:</label>
                 <input type="text" id="quizCode" class="code-input" placeholder="XXXXX" maxlength="10" required>
             </div>
             <button class="btn-primary" id="btn-check-code" onclick="verifyQuizCode()">تحقق من الرمز 🔍</button>
         </div>
 
-        <!-- الخطوة الثانية: اختيار بيانات الطالب (مخفية افتراضياً) -->
         <div id="step2-student-details" style="display:none;">
             <div style="background:#eaf2f8; padding:15px; border-radius:10px; border:1px solid #3498db; margin-bottom:20px; text-align:center;">
                 <h3 id="fetchedQuizName" style="color:#2980b9; margin:0 0 5px 0;"></h3>
@@ -199,13 +197,13 @@
                 </select>
             </div>
 
-            <button class="btn-primary" onclick="startQuizUI()">دخول للاختبار 🚀</button>
+            <button class="btn-primary" onclick="startQuizUI()">دخول للنشاط 🚀</button>
         </div>
 
         <div id="loading">⏳ جاري الاتصال بالسيرفر... يرجى الانتظار</div>
     </div>
 
-    <!-- قسم الاختبار -->
+    <!-- قسم الاختبار العادي -->
     <div class="container" id="quiz-section" style="display: none;">
         <div class="header">
             <h1 id="display-quiz-name">عنوان الاختبار</h1>
@@ -222,66 +220,50 @@
     <div class="container" id="game-section" style="display: none; max-width: 800px;">
         <div class="header">
             <h1 id="gameTitle" style="color: #8e44ad;">🎮 عنوان اللعبة</h1>
-            <p>لعبة مطابقة تفاعلية</p>
+            <p id="gameSubtitle" style="color: #7f8c8d; font-weight:bold;">لعبة تفاعلية</p>
         </div>
         <div id="gameArea" class="matching-grid"></div>
     </div>
 
-    <!-- رسالة النجاح -->
+    <!-- رسالة النجاح والنتيجة -->
     <div class="container" id="success-section" style="display: none; text-align: center;">
         <div style="font-size: 70px; margin-bottom: 20px;">🎉</div>
         <h2 style="color: var(--secondary-color); font-size: 28px; margin-bottom: 10px;">تم استلام إجاباتك بنجاح!</h2>
-        <p style="color: #7f8c8d; font-size: 18px; line-height: 1.8; font-weight: bold;">شكراً لك.<br>لقد تم حفظ درجاتك وإرسالها إلى منصة المعلم بشكل آمن.<br>يمكنك إغلاق هذه الصفحة الآن.</p>
+        <h3 id="success-score" style="color: #27ae60; font-size: 26px; margin-bottom: 20px; background: #eafaf1; padding: 15px; border-radius: 12px; border: 2px dashed #27ae60; display: inline-block;"></h3>
+        <p style="color: #7f8c8d; font-size: 18px; line-height: 1.8; font-weight: bold;">شكراً لك.<br>لقد تم تقييم إجاباتك وإرسالها إلى منصة المعلم بشكل آمن.<br>يمكنك إغلاق هذه الصفحة الآن.</p>
     </div>
 
     <script>
-        // 🚨 حماية الصفحة من الغش (النظام الصارم) 🚨
-        
-        // 1. منع النقر بزر الماوس الأيمن
+        // 🚨 حماية الصفحة من الغش 🚨
         document.addEventListener('contextmenu', event => event.preventDefault());
-
-        // 2. منع اختصارات لوحة المفاتيح (النسخ، اللصق، القص، تحديد الكل، وأدوات المطور F12)
         document.addEventListener('keydown', function(event) {
-            // منع النسخ واللصق وتحديد الكل
-            if (event.ctrlKey && ['c', 'v', 'x', 'a', 'C', 'V', 'X', 'A'].includes(event.key)) {
-                event.preventDefault();
-            }
-            // منع فتح أدوات المطور (F12, Ctrl+Shift+I, Ctrl+U)
-            if (event.key === 'F12' || 
-               (event.ctrlKey && event.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(event.key)) || 
-               (event.ctrlKey && ['U', 'u'].includes(event.key))) {
-                event.preventDefault();
-            }
+            if (event.ctrlKey && ['c', 'v', 'x', 'a', 'C', 'V', 'X', 'A'].includes(event.key)) { event.preventDefault(); }
+            if (event.key === 'F12' || (event.ctrlKey && event.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(event.key)) || (event.ctrlKey && ['U', 'u'].includes(event.key))) { event.preventDefault(); }
         });
-
-        // 3. منع أحداث النسخ واللصق والقص المباشرة
         document.addEventListener('copy', event => event.preventDefault());
         document.addEventListener('paste', event => event.preventDefault());
         document.addEventListener('cut', event => event.preventDefault());
-
-        // 4. منع سحب وإفلات النصوص (Drag & Drop) لمنع سحب الأسئلة
         document.addEventListener('dragstart', event => event.preventDefault());
         document.addEventListener('drop', event => event.preventDefault());
 
-        // --- المتغيرات الأساسية للمنصة (لا تحذفها) ---
         const SCRIPT_URL = 'https://darkslateblue-wren-226762.hostingersite.com/api.php';
         let currentQuestions = [];
-        let studentsDirectory = {}; // كشف أسماء الطلاب الخاص بالمعلم
+        let studentsDirectory = {};
         let cheatCount = 0;
+        
+        // نظام تتبع الأخطاء في الألعاب
+        let gameMistakes = {}; 
 
-        // 5. التشديد الصارم على الخروج من الصفحة (نافذة فقدت التركيز)
         window.addEventListener("blur", () => {
-            // نتحقق أن الطالب في مرحلة الاختبار الفعلي وليس في شاشة الدخول
             if (document.getElementById('quiz-section').style.display === 'block') {
                 cheatCount++;
-                let maxAttempts = 3; // عدد المحاولات المسموحة قبل سحب الاختبار
+                let maxAttempts = 3;
                 let remaining = maxAttempts - cheatCount;
-                
                 if (remaining > 0) {
                     alert(`🚨 تحذير شديد: لقد قمت بالخروج من شاشة الاختبار أو فتح نافذة/تطبيق آخر!\n\nتم تسجيل هذه المحاولة كحالة غش (رقم ${cheatCount}).\n⚠️ تبقى لك (${remaining}) محاولات قبل أن يتم سحب الاختبار وتسليمه تلقائياً!`);
                 } else {
                     alert("⛔ تم استنفاد جميع المحاولات! سيتم سحب الاختبار وتسليم إجاباتك الحالية تلقائياً.");
-                    submitAnswers(); // استدعاء دالة تسليم الاختبار إجبارياً
+                    submitAnswers();
                 }
             }
         });
@@ -293,8 +275,7 @@
             setTimeout(() => alertBox.style.display = 'none', 5000);
         }
 
-        // 1. التحقق من الرمز وجلب بيانات الاختبار والمعلم
-       function verifyQuizCode() {
+        function verifyQuizCode() {
             const code = document.getElementById('quizCode').value.trim().toUpperCase();
             if (!code) return showAlert("الرجاء إدخال رمز الاختبار.");
 
@@ -307,8 +288,6 @@
                     if (data.status === "success") {
                         document.getElementById('fetchedQuizName').innerText = data.quizName;
                         currentQuestions = data.questions;
-                        
-                        // بعد إيجاد الاختبار، نقوم بجلب قائمة طلاب المعلم الذي أنشأه
                         fetchTeacherStudents(data.teacher_id);
                     } else {
                         document.getElementById('loading').style.display = 'none';
@@ -322,7 +301,7 @@
                     showAlert("حدث خطأ في الاتصال. تأكد من الإنترنت وحاول مجدداً.");
                 });
         }
-        // 2. جلب قوائم الطلاب الخاصة بالمعلم
+
         function fetchTeacherStudents(teacherId) {
             fetch(`${SCRIPT_URL}?action=getStudentDirectory&teacher_id=${teacherId}`)
                 .then(r => r.json())
@@ -330,13 +309,10 @@
                     document.getElementById('loading').style.display = 'none';
                     if(data.status === "success") {
                         studentsDirectory = data.students;
-                        
-                        // إخفاء الخطوة الأولى وإظهار الخطوة الثانية
                         document.getElementById('step1-code').style.display = 'none';
                         document.getElementById('header-desc').innerText = "الرجاء تحديد اسمك من القائمة";
                         document.getElementById('step2-student-details').style.display = 'block';
-                        
-                        populateGrades(); // تعبئة الصفوف
+                        populateGrades();
                     } else {
                         document.getElementById('btn-check-code').style.display = 'block';
                         showAlert("الاختبار موجود، لكن لا توجد أسماء طلاب مسجلة لهذا المعلم.");
@@ -349,7 +325,6 @@
                 });
         }
 
-        // 3. دوال تعبئة القوائم المنسدلة ديناميكياً
         function populateGrades() {
             const selGrade = document.getElementById('selGrade');
             selGrade.innerHTML = '<option value="">-- اختر الصف --</option>';
@@ -362,13 +337,10 @@
             const grade = document.getElementById('selGrade').value;
             const selSection = document.getElementById('selSection');
             const selName = document.getElementById('selStudentName');
-            
             selSection.innerHTML = '<option value="">-- اختر الشعبة --</option>';
             selName.innerHTML = '<option value="">-- اختر اسمك --</option>';
             selName.disabled = true;
-
             if(!grade) { selSection.disabled = true; return; }
-            
             selSection.disabled = false;
             Object.keys(studentsDirectory[grade]).sort((a,b) => a - b).forEach(s => {
                 selSection.innerHTML += `<option value="${s}">شعبة ${s}</option>`;
@@ -379,54 +351,44 @@
             const grade = document.getElementById('selGrade').value;
             const section = document.getElementById('selSection').value;
             const selName = document.getElementById('selStudentName');
-            
             selName.innerHTML = '<option value="">-- اختر اسمك --</option>';
-            
             if(!grade || !section) { selName.disabled = true; return; }
-            
             selName.disabled = false;
             studentsDirectory[grade][section].forEach(name => {
                 selName.innerHTML += `<option value="${name}">${name}</option>`;
             });
         }
 
-        // 4. الدخول للاختبار الفعلي
-       // 4. الدخول للاختبار الفعلي
         function startQuizUI() {
             const selName = document.getElementById('selStudentName').value;
             const selGrade = document.getElementById('selGrade').value;
             const selSection = document.getElementById('selSection').value;
-
             if(!selName) return showAlert("الرجاء اختيار اسمك من القائمة للبدء.");
 
             document.getElementById('login-section').style.display = 'none';
 
-            // 🛑 الفلتر الذكي (موزع الألعاب): هل هو اختبار عادي أم لعبة تفاعلية؟
             let quizCode = document.getElementById('quizCode').value.trim().toUpperCase();
+            
+            // التأكد من دعم الألعاب
             if (quizCode.startsWith('G-')) {
-                // استخدام السطر الآمن لمنع الأعطال إذا كانت اللعبة فارغة
+                // تصفير الأخطاء عند بدء اللعبة
+                gameMistakes = {};
+                
                 let gameType = (currentQuestions && currentQuestions[0] && currentQuestions[0].type) ? currentQuestions[0].type : 'matching'; 
                 let title = document.getElementById('fetchedQuizName').innerText;
                 
-                if (gameType === 'matching') {
-                    startMatchingGame(title, currentQuestions); // 1. تشغيل المطابقة
-                } else if (gameType === 'sorting') {
-                    startSortingGame(title, currentQuestions); // 2. تشغيل الفرز
-                } else if (gameType === 'sequence') {
-                    startSequenceGame(title, currentQuestions); // 3. تشغيل الترتيب
-                } else if (gameType === 'spaceman') {
-                    startSpacemanGame(title, currentQuestions); // 4. تشغيل رائد الفضاء
-                } else {
+                if (gameType === 'matching') { startMatchingGame(title, currentQuestions); } 
+                else if (gameType === 'sorting') { startSortingGame(title, currentQuestions); } 
+                else if (gameType === 'sequence') { startSequenceGame(title, currentQuestions); } 
+                else if (gameType === 'spaceman') { startSpacemanGame(title, currentQuestions); } 
+                else {
                     alert("⏳ هذا القالب من الألعاب قيد البرمجة وسيتم إطلاقه قريباً!");
                     location.reload();
                 }
-                return; // 🛑 إيقاف الكود هنا لمنع ظهور شاشة الاختبار العادي
+                return;
             }
-
-            // ==========================================
-            // 👇 إذا لم يكن الكود يبدأ بـ G- سيتم تشغيل الاختبار العادي 👇
-            // ==========================================
             
+            // الاختبار العادي
             document.getElementById('quiz-section').style.display = 'block';
             document.getElementById('display-quiz-name').innerText = document.getElementById('fetchedQuizName').innerText;
             document.getElementById('display-student-name').innerText = selName;
@@ -437,7 +399,6 @@
 
             currentQuestions.forEach((q, index) => {
                 let questionHTML = `<div class="question-card"><div class="question-title">${index + 1}. ${q.question}</div>`;
-
                 if (q.type === 'mcq') {
                     questionHTML += `<div class="options-container">`;
                     q.options.forEach((opt) => {
@@ -451,13 +412,12 @@
                 else {
                     questionHTML += `<input type="text" id="q_${index}" placeholder="إجابة قصيرة...">`;
                 }
-
                 questionHTML += `</div>`;
                 wrapper.innerHTML += questionHTML;
             });
         }
 
-        // 5. تسليم الإجابات
+        // إرسال إجابات الاختبار العادي
         function submitAnswers() {
             let answers = [];
             let allAnswered = true;
@@ -475,46 +435,15 @@
                 }
 
                 if (!studentAnswer) allAnswered = false;
-
                 answers.push({ question: currentQuestions[i].question, answer: studentAnswer || "لم يجب" });
             }
 
             if (!allAnswered && !confirm("⚠️ توجد أسئلة لم تقم بالإجابة عليها! هل أنت متأكد من رغبتك في التسليم؟")) return;
 
-            const payload = {
-                action: "submit",
-                studentName: document.getElementById('selStudentName').value, // الاسم المختار من القائمة
-                grade: document.getElementById('selGrade').value,
-                section: document.getElementById('selSection').value,
-                studentId: document.getElementById('quizCode').value.toUpperCase(),
-                cheatCount: cheatCount,
-                answers: answers
-            };
-
-            const btn = document.getElementById('btn-submit');
-            const loading = document.getElementById('submit-loading');
-            
-            btn.style.display = 'none';
-            loading.style.display = 'block';
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('quiz-section').style.display = 'none';
-                document.getElementById('success-section').style.display = 'block';
-            })
-            .catch(error => {
-                alert("حدث خطأ أثناء إرسال الإجابات. تأكد من اتصالك بالإنترنت.");
-                btn.style.display = 'block';
-                loading.style.display = 'none';
-            });
+            sendPayloadToCloud(answers, cheatCount, false);
         }
 
-        // --- دوال الألعاب التفاعلية ---
+        // --- دوال الألعاب التفاعلية مع نظام التقييم ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(freq, type, duration) {
             if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -525,19 +454,21 @@
             osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
 
+        // 1. المطابقة
         let firstCard = null; let matchedCount = 0; let totalPairs = 0;
 
         function startMatchingGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
-            document.getElementById('gameTitle').innerText = "🎮 " + title;
+            document.getElementById('gameTitle').innerText = "🧩 " + title;
+            document.getElementById('gameSubtitle').innerText = "لعبة المطابقة";
 
             let cardsArray = []; totalPairs = items.length; matchedCount = 0;
             items.forEach((item, index) => {
                 cardsArray.push({ text: item.word, id: index, type: 'word' });
                 cardsArray.push({ text: item.def, id: index, type: 'def' });
             });
-            cardsArray = cardsArray.sort(() => Math.random() - 0.5); // خلط عشوائي
+            cardsArray = cardsArray.sort(() => Math.random() - 0.5);
 
             const gameArea = document.getElementById('gameArea');
             gameArea.innerHTML = "";
@@ -566,10 +497,14 @@
                         secondCard.classList.replace('selected', 'matched');
                         playSound(1200, 'sine', 0.2); firstCard = null; matchedCount++;
                         if(matchedCount === totalPairs) {
-                           setTimeout(() => { playSound(500, 'triangle', 0.5); alert("🎉 رائع جداً! لقد أكملت اللعبة بنجاح."); submitGameSuccess(); }, 500);
+                           setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 500);
                         }
                     }, 300);
                 } else {
+                    // تسجيل الخطأ للطالب في كلا المصطلحين لتقييمه
+                    gameMistakes[firstCard.dataset.id] = true;
+                    gameMistakes[secondCard.dataset.id] = true;
+                    
                     firstCard.classList.add('wrong'); secondCard.classList.add('wrong');
                     playSound(150, 'sawtooth', 0.3);
                     setTimeout(() => {
@@ -579,14 +514,14 @@
             }
         }
 
-        // --- 2. لعبة فرز المجموعات (Group Sorting) ---
+        // 2. الفرز
         function startSortingGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "🗂️ " + title;
+            document.getElementById('gameSubtitle').innerText = "لعبة الفرز والتصنيف";
 
             const gameArea = document.getElementById('gameArea');
-            // مسح منطقة اللعبة وبناء صناديق الفرز
             gameArea.innerHTML = `
                 <div style="color:#7f8c8d; font-weight:bold; margin-bottom:10px; text-align:center;">👈 اضغط على المصطلح، ثم اضغط على الصندوق المناسب له</div>
                 <div class="sorting-layout">
@@ -600,13 +535,13 @@
             let selectedWordElem = null;
             let sortedCount = 0;
 
-            // 1. خلط وبناء المصطلحات (الأزرار الزرقاء)
             let words = [...items].sort(() => Math.random() - 0.5); 
             words.forEach(w => {
                 let el = document.createElement('div');
                 el.className = 'sort-item';
                 el.innerText = w.word;
-                el.dataset.def = w.def; // إخفاء الإجابة الصحيحة داخل العنصر
+                el.dataset.def = w.def; 
+                el.dataset.originalIndex = items.findIndex(item => item.word === w.word && item.def === w.def);
                 
                 el.onclick = () => {
                     if(selectedWordElem) selectedWordElem.classList.remove('selected-item');
@@ -617,39 +552,31 @@
                 pool.appendChild(el);
             });
 
-            // 2. خلط وبناء الصناديق (التعريفات أو التصنيفات)
             let defs = [...items].sort(() => Math.random() - 0.5);
             defs.forEach(d => {
                 let box = document.createElement('div');
                 box.className = 'sort-box';
                 box.innerHTML = `<div class="box-title">${d.def}</div>`;
                 
-                // برمجة استلام المصطلح داخل الصندوق
                 box.onclick = () => {
-                    if(!selectedWordElem) return; // إذا لم يختر الطالب مصطلحاً، لا تفعل شيئاً
+                    if(!selectedWordElem) return;
 
-                    // التحقق من صحة الإجابة
                     if(selectedWordElem.dataset.def === d.def) {
-                        // إجابة صحيحة ✅
                         selectedWordElem.classList.remove('selected-item');
-                        selectedWordElem.style.background = '#27ae60'; // تحويله للأخضر
-                        selectedWordElem.onclick = null; // تعطيل النقر عليه
-                        box.appendChild(selectedWordElem); // نقل المصطلح لداخل الصندوق
+                        selectedWordElem.style.background = '#27ae60'; 
+                        selectedWordElem.onclick = null; 
+                        box.appendChild(selectedWordElem); 
                         selectedWordElem = null;
                         
                         playSound(1200, 'sine', 0.2);
                         sortedCount++;
-                        
-                        // التحقق من الفوز
                         if(sortedCount === items.length) {
-                            setTimeout(() => { 
-                                playSound(500, 'triangle', 0.5); 
-                                alert("🎉 رائع جداً! لقد أنهيت عملية الفرز بنجاح مبهر!"); submitGameSuccess(); 
-                                location.reload(); 
-                            }, 500);
+                            setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 500);
                         }
                     } else {
-                        // إجابة خاطئة ❌
+                        // تسجيل الخطأ للطالب
+                        gameMistakes[selectedWordElem.dataset.originalIndex] = true;
+                        
                         selectedWordElem.classList.add('wrong');
                         playSound(150, 'sawtooth', 0.3);
                         setTimeout(() => selectedWordElem.classList.remove('wrong'), 400);
@@ -659,44 +586,13 @@
             });
             playSound(600, 'triangle', 0.1);
         }
-        // دالة مخصصة لإرسال نتيجة الألعاب التفاعلية للمعلم
-        function submitGameSuccess() {
-            let gameTitle = document.getElementById('gameTitle').innerText;
-            
-            const payload = {
-                action: "submit",
-                studentName: document.getElementById('selStudentName').value,
-                grade: document.getElementById('selGrade').value,
-                section: document.getElementById('selSection').value,
-                studentId: document.getElementById('quizCode').value.toUpperCase(),
-                cheatCount: 0, // الألعاب التفاعلية لا تحتسب فيها محاولات الخروج كغش حالياً
-                answers: [
-                    { question: "نوع النشاط والتفاصيل", answer: "🎮 " + gameTitle },
-                    { question: "حالة الإنجاز", answer: "✅ اجتاز الطالب اللعبة بنجاح كامل 100%" }
-                ]
-            };
 
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-            .then(data => {
-                // إخفاء شاشة اللعبة وإظهار رسالة النجاح الأنيقة
-                document.getElementById('game-section').style.display = 'none';
-                document.getElementById('success-section').style.display = 'block';
-            })
-            .catch(error => {
-                alert("تم إنهاء اللعبة، لكن حدث خطأ في إرسال النتيجة للمعلم.");
-                location.reload();
-            });
-        }
-            // --- 3. لعبة الترتيب المنطقي (Sequence) ---
+        // 3. الترتيب
         function startSequenceGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "🔢 " + title;
+            document.getElementById('gameSubtitle').innerText = "لعبة الترتيب المنطقي";
 
             const gameArea = document.getElementById('gameArea');
             gameArea.innerHTML = `
@@ -705,23 +601,19 @@
                     <div class="seq-pool" id="seqPool"></div>
                     <div class="seq-slots" id="seqSlots"></div>
                 </div>
-                <button id="btnCheckSeq" onclick="checkSequence()" style="display:none; background:#8e44ad; color:white; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:18px; cursor:pointer; width:100%; margin-top:20px; box-shadow:0 4px 10px rgba(142, 68, 173, 0.3);">تحقق من الإجابة ✅</button>
+                <button id="btnCheckSeq" onclick="checkSequence()" style="display:none; background:#8e44ad; color:white; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:18px; cursor:pointer; width:100%; margin-top:20px; box-shadow:0 4px 10px rgba(142, 68, 173, 0.3);">تحقق من الترتيب ✅</button>
             `;
 
             let pool = document.getElementById('seqPool');
             let slotsContainer = document.getElementById('seqSlots');
 
-            // 1. إنشاء الأماكن الفارغة (Slots) المرقمة
             items.forEach((_, i) => {
                 let slot = document.createElement('div');
                 slot.className = 'seq-slot';
                 slotsContainer.appendChild(slot);
             });
 
-            // 2. خلط الخطوات (نعتمد الترتيب الذي أدخله المعلم كـ Original Index)
-            // ندمج المصطلح والتعريف ليظهر كخطوة واحدة واضحة
-            let shuffled = items.map((item, index) => ({ text: item.word + " : " + item.def, originalIndex: index }))
-                                .sort(() => Math.random() - 0.5);
+            let shuffled = items.map((item, index) => ({ text: item.word + " : " + item.def, originalIndex: index })).sort(() => Math.random() - 0.5);
 
             shuffled.forEach(item => {
                 let el = document.createElement('div');
@@ -729,22 +621,18 @@
                 el.innerText = item.text;
                 el.dataset.correctIndex = item.originalIndex;
                 
-                // حركة النقل بين المسبح والأماكن المرقمة
                 el.onclick = function() {
                     let slots = document.querySelectorAll('.seq-slot');
                     playSound(800, 'sine', 0.1);
                     
                     if(this.parentElement === pool) {
-                        // نقل للأسفل
                         for(let slot of slots) {
                             if(slot.children.length === 0) { slot.appendChild(this); break; }
                         }
                     } else {
-                        // إعادة للأعلى (إلغاء التحديد)
                         pool.appendChild(this);
                     }
                     
-                    // إظهار زر "التحقق" فقط إذا امتلأت كل الخانات
                     let allFilled = Array.from(slots).every(slot => slot.children.length > 0);
                     document.getElementById('btnCheckSeq').style.display = allFilled ? 'block' : 'none';
                 };
@@ -753,7 +641,6 @@
             playSound(600, 'triangle', 0.1);
         }
 
-        // دالة التحقق من صحة الترتيب
         window.checkSequence = function() {
             let slots = document.querySelectorAll('.seq-slot');
             let isWin = true;
@@ -761,15 +648,18 @@
             slots.forEach((slot, index) => {
                 let item = slot.children[0];
                 if(parseInt(item.dataset.correctIndex) === index) {
-                    item.style.background = '#27ae60'; // أخضر للصح
+                    item.style.background = '#27ae60'; 
                 } else {
                     isWin = false;
-                    item.classList.add('wrong-seq'); // أحمر واهتزاز للخطأ
+                    // تسجيل الخطأ
+                    gameMistakes[item.dataset.correctIndex] = true;
+                    
+                    item.classList.add('wrong-seq'); 
                     playSound(150, 'sawtooth', 0.3);
                     setTimeout(() => {
                         item.classList.remove('wrong-seq');
                         item.style.background = '#3498db';
-                        document.getElementById('seqPool').appendChild(item); // طرده للأعلى ليعيد المحاولة
+                        document.getElementById('seqPool').appendChild(item); 
                         document.getElementById('btnCheckSeq').style.display = 'none';
                     }, 800);
                 }
@@ -777,25 +667,23 @@
 
             if(isWin) {
                 playSound(1200, 'sine', 0.2);
-                setTimeout(() => { 
-                    playSound(500, 'triangle', 0.5); 
-                    alert("🎉 عبقري! لقد قمت بترتيب الخطوات بشكل صحيح 100%!"); submitGameSuccess(); 
-                    location.reload(); 
-                }, 500);
+                setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 500);
             }
         };
-        // --- 4. لعبة إنقاذ رائد الفضاء (Spaceman) ---
+
+        // 4. رائد الفضاء
         let smItems = [];
         let smCurrentIndex = 0;
         let smWord = "";
         let smGuessed = [];
         let smWrongCount = 0;
-        const smMaxWrong = 6; // عدد الأخطاء المسموحة قبل نفاد الأكسجين
+        const smMaxWrong = 6; 
 
         function startSpacemanGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "👨‍🚀 " + title;
+            document.getElementById('gameSubtitle').innerText = "لعبة إنقاذ رائد الفضاء";
             
             smItems = items;
             smCurrentIndex = 0;
@@ -803,17 +691,11 @@
         }
 
         function loadSpacemanWord() {
-            // التحقق من الفوز بجميع الكلمات
             if (smCurrentIndex >= smItems.length) {
-                setTimeout(() => { 
-                    playSound(500, 'triangle', 0.5); 
-                    alert("🎉 مهمة ناجحة! لقد أنقذت رائد الفضاء وأكملت جميع المصطلحات بنجاح!"); 
-                    submitGameSuccess(); // إرسال النتيجة للمعلم
-                }, 500);
+                setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 500);
                 return;
             }
             
-            // تهيئة الكلمة الحالية
             smWord = smItems[smCurrentIndex].word.trim().toLowerCase();
             let def = smItems[smCurrentIndex].def;
             smGuessed = [];
@@ -823,15 +705,12 @@
             gameArea.innerHTML = `
                 <div class="spaceman-layout">
                     <div class="hint-box">💡 <b>تلميح:</b> ${def}</div>
-                    
                     <div class="oxygen-container">
                         <div class="oxygen-bar" id="oxygenBar"></div>
                         <div class="oxygen-text" id="oxygenText">مستوى الأكسجين: 100%</div>
                     </div>
-                    
                     <div class="word-display" id="wordDisplay"></div>
                     <div class="keyboard" id="keyboard"></div>
-                    
                     <div style="font-weight:bold; color:#7f8c8d; margin-top:20px; font-size:14px;">
                         المصطلح ( ${smCurrentIndex + 1} ) من أصل ( ${smItems.length} )
                     </div>
@@ -853,48 +732,36 @@
                 let char = smWord[i];
                 let box = document.createElement('div');
                 
-                // تجاوز المسافات والرموز لتسهيل اللعبة
                 if (char === " " || char === "-") {
                     box.style.border = "none";
                     box.style.width = "20px";
                     box.innerText = char === "-" ? "-" : "";
                 } else {
                     box.className = "letter-box";
-                    if (smGuessed.includes(char)) {
-                        box.innerText = char;
-                    } else {
-                        box.innerText = "";
-                        allGuessed = false; // لا يزال هناك حروف مفقودة
-                    }
+                    if (smGuessed.includes(char)) { box.innerText = char; } 
+                    else { box.innerText = ""; allGuessed = false; }
                 }
                 display.appendChild(box);
             }
             
-            // إذا خمن الكلمة بالكامل
             if (allGuessed) {
                 playSound(1200, 'sine', 0.2);
-                document.getElementById('keyboard').style.pointerEvents = "none"; // تعطيل الكيبورد
+                document.getElementById('keyboard').style.pointerEvents = "none";
                 setTimeout(() => {
                     smCurrentIndex++;
-                    loadSpacemanWord(); // الانتقال للكلمة التالية
+                    loadSpacemanWord();
                 }, 1500);
             }
         }
 
         function buildKeyboard() {
             const kb = document.getElementById('keyboard');
-            // الحروف العربية الأساسية
             let lettersArray = "ابتثجحخدذرزسشصضطظعغفقكلمنهويأإآؤئءةى".split("");
-            
-            // إضافة الحروف الإنجليزية إذا كان المصطلح يحتوي عليها
-            if (/[a-z]/.test(smWord)) {
-                lettersArray = lettersArray.concat("abcdefghijklmnopqrstuvwxyz".split(""));
-            }
+            if (/[a-z]/.test(smWord)) lettersArray = lettersArray.concat("abcdefghijklmnopqrstuvwxyz".split(""));
             
             lettersArray.forEach(l => {
                 let btn = document.createElement('button');
-                btn.className = "key-btn";
-                btn.innerText = l;
+                btn.className = "key-btn"; btn.innerText = l;
                 btn.onclick = () => handleSpacemanGuess(l, btn);
                 kb.appendChild(btn);
             });
@@ -912,12 +779,14 @@
                 playSound(150, 'sawtooth', 0.3);
                 updateOxygen();
                 
-                // حالة الخسارة للكلمة الحالية
                 if (smWrongCount >= smMaxWrong) {
+                    // تسجيل الخطأ للطالب في هذه الكلمة
+                    gameMistakes[smCurrentIndex] = true;
+                    
                     document.getElementById('keyboard').style.pointerEvents = "none";
                     setTimeout(() => {
                         alert("❌ نفد الأكسجين تماماً!\nالإجابة الصحيحة كانت: ( " + smWord.toUpperCase() + " )\nسنقوم بإعادة تعبئة الأكسجين لتعيد المحاولة.");
-                        loadSpacemanWord(); // إعادة نفس الكلمة ليتعلم منها
+                        loadSpacemanWord(); 
                     }, 500);
                 }
             }
@@ -929,14 +798,63 @@
             document.getElementById('oxygenText').innerText = `مستوى الأكسجين: ${Math.round(oxygenPercent)}%`;
             bar.style.width = oxygenPercent + "%";
             
-            // تغيير لون الأكسجين حسب المستوى
-            if (oxygenPercent > 50) {
-                bar.style.background = "#3498db"; // أزرق آمن
-            } else if (oxygenPercent > 20) {
-                bar.style.background = "#f39c12"; // برتقالي تحذير
-            } else {
-                bar.style.background = "#e74c3c"; // أحمر خطر
-            }
+            if (oxygenPercent > 50) bar.style.background = "#3498db"; 
+            else if (oxygenPercent > 20) bar.style.background = "#f39c12"; 
+            else bar.style.background = "#e74c3c"; 
+        }
+
+        // --- دالة الإرسال المشتركة المخصصة للألعاب ---
+        function submitGameSuccess() {
+            // تجهيز مصفوفة الإجابات المفصلة بناءً على الأخطاء التي تم رصدها
+            let answersPayload = currentQuestions.map((q, index) => {
+                let failed = gameMistakes[index];
+                return {
+                    question: q.word || q.question, // دعم للمسميات المختلفة
+                    answer: failed ? "أخطأ قبل الوصول للإجابة" : (q.def || "إجابة صحيحة"),
+                    correctAnswer: q.def,
+                    isCorrect: !failed // تعيين الصح والخطأ
+                };
+            });
+
+            // حساب النتيجة لعرضها للطالب
+            let score = currentQuestions.length - Object.keys(gameMistakes).length;
+            let total = currentQuestions.length;
+            document.getElementById('success-score').innerText = `النتيجة النهائية: ${score} من ${total}`;
+
+            sendPayloadToCloud(answersPayload, 0, true);
+        }
+
+        // دالة الإرسال النهائية للسيرفر
+        function sendPayloadToCloud(answersData, cheatCountVal, isGame) {
+            const payload = {
+                action: "submit",
+                studentName: document.getElementById('selStudentName').value,
+                grade: document.getElementById('selGrade').value,
+                section: document.getElementById('selSection').value,
+                studentId: document.getElementById('quizCode').value.toUpperCase(),
+                cheatCount: cheatCountVal,
+                answers: answersData
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(isGame) document.getElementById('game-section').style.display = 'none';
+                else document.getElementById('quiz-section').style.display = 'none';
+                
+                document.getElementById('success-section').style.display = 'block';
+            })
+            .catch(error => {
+                alert("حدث خطأ أثناء إرسال الإجابات. تأكد من اتصالك بالإنترنت.");
+                if(!isGame) {
+                    document.getElementById('btn-submit').style.display = 'block';
+                    document.getElementById('submit-loading').style.display = 'none';
+                }
+            });
         }
     </script>
 </body>
