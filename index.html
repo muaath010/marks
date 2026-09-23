@@ -112,6 +112,9 @@
         .match-card:hover { transform: translateY(-5px); border-color: #3498db; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2); }
         .match-card.selected { background: #f1c40f; border-color: #f39c12; color: #fff; transform: scale(1.05); }
         .match-card.matched { background: #27ae60; border-color: #2ecc71; color: #fff; transform: scale(0.9); opacity: 0.6; pointer-events: none; }
+        
+        /* تأثير البطاقة الخاطئة المقفلة (التقييم الصارم) */
+        .match-card.wrong-locked { background: #e74c3c !important; border-color: #c0392b !important; color: #fff !important; transform: scale(0.9); opacity: 0.7; pointer-events: none; }
         .match-card.wrong { background: #e74c3c; border-color: #c0392b; color: #fff; animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
 
@@ -134,8 +137,7 @@
         .seq-slot { background: white; border: 2px dashed #bdc3c7; border-radius: 10px; min-height: 54px; display: flex; align-items: center; position: relative; transition: 0.3s; }
         .seq-slot::before { counter-increment: seq-counter; content: counter(seq-counter); position: absolute; right: -15px; top: 50%; transform: translateY(-50%); background: #f39c12; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;}
         .seq-slot .seq-item { margin: 0; width: 100%; box-sizing: border-box; background: #2c3e50; }
-        .seq-item.wrong-seq { background: #e74c3c !important; animation: shake 0.4s; }
-
+        
         /* --- تصميم لعبة إنقاذ رائد الفضاء (Spaceman) --- */
         .spaceman-layout { text-align: center; margin-top: 20px; }
         .oxygen-container { background: #ecf0f1; border-radius: 20px; width: 100%; height: 35px; border: 3px solid #bdc3c7; margin-bottom: 25px; overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
@@ -220,7 +222,7 @@
     <div class="container" id="game-section" style="display: none; max-width: 800px;">
         <div class="header">
             <h1 id="gameTitle" style="color: #8e44ad;">🎮 عنوان اللعبة</h1>
-            <p id="gameSubtitle" style="color: #7f8c8d; font-weight:bold;">لعبة تفاعلية</p>
+            <p id="gameSubtitle" style="color: #7f8c8d; font-weight:bold;">لعبة تفاعلية - وضع الاختبار</p>
         </div>
         <div id="gameArea" class="matching-grid"></div>
     </div>
@@ -251,7 +253,7 @@
         let studentsDirectory = {};
         let cheatCount = 0;
         
-        // نظام تتبع الأخطاء في الألعاب
+        // نظام تتبع الأخطاء في الألعاب (التقييم الصارم)
         let gameMistakes = {}; 
 
         window.addEventListener("blur", () => {
@@ -443,7 +445,7 @@
             sendPayloadToCloud(answers, cheatCount, false);
         }
 
-        // --- دوال الألعاب التفاعلية مع نظام التقييم ---
+        // --- دوال الألعاب التفاعلية مع نظام التقييم الصارم ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(freq, type, duration) {
             if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -454,14 +456,14 @@
             osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
 
-        // 1. المطابقة
+        // 1. لعبة المطابقة الصارمة
         let firstCard = null; let matchedCount = 0; let totalPairs = 0;
 
         function startMatchingGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "🧩 " + title;
-            document.getElementById('gameSubtitle').innerText = "لعبة المطابقة";
+            document.getElementById('gameSubtitle').innerText = "لعبة المطابقة (تُحسب النتيجة من المحاولة الأولى)";
 
             let cardsArray = []; totalPairs = items.length; matchedCount = 0;
             items.forEach((item, index) => {
@@ -484,7 +486,8 @@
         }
 
         function handleCardClick(card) {
-            if(card.classList.contains('matched') || card.classList.contains('selected')) return;
+            // منع النقر على البطاقات المقفلة أو المفتوحة مسبقاً
+            if(card.classList.contains('matched') || card.classList.contains('selected') || card.classList.contains('wrong-locked')) return;
             card.classList.add('selected'); playSound(800, 'sine', 0.1);
 
             if(!firstCard) {
@@ -492,38 +495,51 @@
             } else {
                 let secondCard = card;
                 if(firstCard.dataset.id === secondCard.dataset.id && firstCard.dataset.type !== secondCard.dataset.type) {
-                    setTimeout(() => {
-                        firstCard.classList.replace('selected', 'matched');
-                        secondCard.classList.replace('selected', 'matched');
-                        playSound(1200, 'sine', 0.2); firstCard = null; matchedCount++;
-                        if(matchedCount === totalPairs) {
-                           setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 500);
-                        }
-                    }, 300);
+                    // مطابقة صحيحة
+                    firstCard.classList.replace('selected', 'matched');
+                    secondCard.classList.replace('selected', 'matched');
+                    playSound(1200, 'sine', 0.2); 
+                    firstCard = null; matchedCount++;
+                    if(matchedCount === totalPairs) {
+                       setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 1000);
+                    }
                 } else {
-                    // تسجيل الخطأ للطالب في كلا المصطلحين لتقييمه
-                    gameMistakes[firstCard.dataset.id] = true;
-                    gameMistakes[secondCard.dataset.id] = true;
+                    // مطابقة خاطئة (التقييم الصارم - إقفال البطاقة)
+                    gameMistakes[firstCard.dataset.id] = true; // تسجيل الخطأ في النظام
                     
-                    firstCard.classList.add('wrong'); secondCard.classList.add('wrong');
+                    firstCard.classList.replace('selected', 'wrong-locked'); // قفل البطاقة الأولى كخطأ
+                    secondCard.classList.add('wrong'); // تأثير الاهتزاز للبطاقة الثانية
                     playSound(150, 'sawtooth', 0.3);
+                    
+                    // البحث عن الإجابة الحقيقية للبطاقة الأولى وقفلها أيضاً لمنع الأخطاء البرمجية
+                    let trueMatchType = firstCard.dataset.type === 'word' ? 'def' : 'word';
+                    let trueMatch = document.querySelector(`.match-card[data-id="${firstCard.dataset.id}"][data-type="${trueMatchType}"]`);
+                    
                     setTimeout(() => {
-                        firstCard.classList.remove('selected', 'wrong'); secondCard.classList.remove('selected', 'wrong'); firstCard = null;
-                    }, 500);
+                        secondCard.classList.remove('selected', 'wrong'); // إعادة البطاقة الثانية للعب
+                        if (trueMatch) {
+                            trueMatch.classList.add('wrong-locked'); // قفل إجابتها الحقيقية
+                        }
+                        firstCard = null;
+                        matchedCount++;
+                        if(matchedCount === totalPairs) {
+                           setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 1000);
+                        }
+                    }, 800);
                 }
             }
         }
 
-        // 2. الفرز
+        // 2. لعبة الفرز الصارمة
         function startSortingGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "🗂️ " + title;
-            document.getElementById('gameSubtitle').innerText = "لعبة الفرز والتصنيف";
+            document.getElementById('gameSubtitle').innerText = "لعبة الفرز والتصنيف (الخطأ يُحسب فوراً)";
 
             const gameArea = document.getElementById('gameArea');
             gameArea.innerHTML = `
-                <div style="color:#7f8c8d; font-weight:bold; margin-bottom:10px; text-align:center;">👈 اضغط على المصطلح، ثم اضغط على الصندوق المناسب له</div>
+                <div style="color:#7f8c8d; font-weight:bold; margin-bottom:10px; text-align:center;">👈 اضغط على المصطلح، ثم اختر الصندوق. (لا يمكنك التراجع!)</div>
                 <div class="sorting-layout">
                     <div class="items-pool" id="itemsPool"></div>
                     <div class="boxes-container" id="boxesContainer"></div>
@@ -561,25 +577,30 @@
                 box.onclick = () => {
                     if(!selectedWordElem) return;
 
+                    sortedCount++; // زيادة عداد المحاولات المنتهية
+
                     if(selectedWordElem.dataset.def === d.def) {
+                        // إجابة صحيحة
                         selectedWordElem.classList.remove('selected-item');
                         selectedWordElem.style.background = '#27ae60'; 
-                        selectedWordElem.onclick = null; 
+                        selectedWordElem.onclick = null; // قفل العنصر
                         box.appendChild(selectedWordElem); 
                         selectedWordElem = null;
-                        
                         playSound(1200, 'sine', 0.2);
-                        sortedCount++;
-                        if(sortedCount === items.length) {
-                            setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 500);
-                        }
                     } else {
-                        // تسجيل الخطأ للطالب
+                        // إجابة خاطئة (التقييم الصارم - يُقفل باللون الأحمر في الصندوق الخاطئ)
                         gameMistakes[selectedWordElem.dataset.originalIndex] = true;
                         
-                        selectedWordElem.classList.add('wrong');
+                        selectedWordElem.classList.remove('selected-item');
+                        selectedWordElem.style.background = '#e74c3c'; // أحمر
+                        selectedWordElem.onclick = null; // قفل العنصر نهائياً
+                        box.appendChild(selectedWordElem); 
+                        selectedWordElem = null;
                         playSound(150, 'sawtooth', 0.3);
-                        setTimeout(() => selectedWordElem.classList.remove('wrong'), 400);
+                    }
+                    
+                    if(sortedCount === items.length) {
+                        setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 1000);
                     }
                 };
                 boxes.appendChild(box);
@@ -587,21 +608,21 @@
             playSound(600, 'triangle', 0.1);
         }
 
-        // 3. الترتيب
+        // 3. لعبة الترتيب الصارمة
         function startSequenceGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "🔢 " + title;
-            document.getElementById('gameSubtitle').innerText = "لعبة الترتيب المنطقي";
+            document.getElementById('gameSubtitle').innerText = "لعبة الترتيب المنطقي (التحقق لمرة واحدة فقط)";
 
             const gameArea = document.getElementById('gameArea');
             gameArea.innerHTML = `
-                <div style="color:#7f8c8d; font-weight:bold; margin-bottom:10px; text-align:center;">👈 اضغط على الخطوات لترتيبها بالتسلسل الصحيح</div>
+                <div style="color:#7f8c8d; font-weight:bold; margin-bottom:10px; text-align:center;">👈 رتب الخطوات، ثم اضغط على زر التحقق. (لديك محاولة واحدة فقط!)</div>
                 <div class="sequence-layout">
                     <div class="seq-pool" id="seqPool"></div>
                     <div class="seq-slots" id="seqSlots"></div>
                 </div>
-                <button id="btnCheckSeq" onclick="checkSequence()" style="display:none; background:#8e44ad; color:white; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:18px; cursor:pointer; width:100%; margin-top:20px; box-shadow:0 4px 10px rgba(142, 68, 173, 0.3);">تحقق من الترتيب ✅</button>
+                <button id="btnCheckSeq" onclick="checkSequence()" style="display:none; background:#8e44ad; color:white; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:18px; cursor:pointer; width:100%; margin-top:20px; box-shadow:0 4px 10px rgba(142, 68, 173, 0.3);">تحقق من الترتيب النهائي ✅</button>
             `;
 
             let pool = document.getElementById('seqPool');
@@ -645,33 +666,30 @@
             let slots = document.querySelectorAll('.seq-slot');
             let isWin = true;
 
+            // إخفاء الزر لعدم السماح بالتعديل
+            document.getElementById('btnCheckSeq').style.display = 'none';
+
             slots.forEach((slot, index) => {
                 let item = slot.children[0];
                 if(parseInt(item.dataset.correctIndex) === index) {
                     item.style.background = '#27ae60'; 
+                    item.onclick = null; // قفل العنصر
                 } else {
                     isWin = false;
-                    // تسجيل الخطأ
-                    gameMistakes[item.dataset.correctIndex] = true;
-                    
-                    item.classList.add('wrong-seq'); 
-                    playSound(150, 'sawtooth', 0.3);
-                    setTimeout(() => {
-                        item.classList.remove('wrong-seq');
-                        item.style.background = '#3498db';
-                        document.getElementById('seqPool').appendChild(item); 
-                        document.getElementById('btnCheckSeq').style.display = 'none';
-                    }, 800);
+                    gameMistakes[item.dataset.correctIndex] = true; // تسجيل الخطأ
+                    item.style.background = '#e74c3c'; // تلوين بالأحمر
+                    item.onclick = null; // قفل العنصر
                 }
             });
 
-            if(isWin) {
-                playSound(1200, 'sine', 0.2);
-                setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 500);
-            }
+            if(isWin) playSound(1200, 'sine', 0.2);
+            else playSound(150, 'sawtooth', 0.3);
+            
+            // إنهاء اللعبة فوراً وإرسال النتيجة بعد ثانية ونصف
+            setTimeout(() => { submitGameSuccess(); }, 1500);
         };
 
-        // 4. رائد الفضاء
+        // 4. رائد الفضاء الصارمة
         let smItems = [];
         let smCurrentIndex = 0;
         let smWord = "";
@@ -683,7 +701,7 @@
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "👨‍🚀 " + title;
-            document.getElementById('gameSubtitle').innerText = "لعبة إنقاذ رائد الفضاء";
+            document.getElementById('gameSubtitle').innerText = "إنقاذ رائد الفضاء (نفاد الأكسجين يعني ضياع السؤال)";
             
             smItems = items;
             smCurrentIndex = 0;
@@ -712,7 +730,7 @@
                     <div class="word-display" id="wordDisplay"></div>
                     <div class="keyboard" id="keyboard"></div>
                     <div style="font-weight:bold; color:#7f8c8d; margin-top:20px; font-size:14px;">
-                        المصطلح ( ${smCurrentIndex + 1} ) من أصل ( ${smItems.length} )
+                        السؤال ( ${smCurrentIndex + 1} ) من أصل ( ${smItems.length} )
                     </div>
                 </div>
             `;
@@ -749,7 +767,7 @@
                 document.getElementById('keyboard').style.pointerEvents = "none";
                 setTimeout(() => {
                     smCurrentIndex++;
-                    loadSpacemanWord();
+                    loadSpacemanWord(); // الانتقال للسؤال التالي بنجاح
                 }, 1500);
             }
         }
@@ -780,14 +798,32 @@
                 updateOxygen();
                 
                 if (smWrongCount >= smMaxWrong) {
-                    // تسجيل الخطأ للطالب في هذه الكلمة
+                    // تسجيل الخطأ للطالب وعدم إعطائه فرصة الإعادة
                     gameMistakes[smCurrentIndex] = true;
-                    
                     document.getElementById('keyboard').style.pointerEvents = "none";
+                    
+                    // كشف الإجابة الصحيحة باللون الأحمر
+                    const display = document.getElementById('wordDisplay');
+                    display.innerHTML = "";
+                    for (let i = 0; i < smWord.length; i++) {
+                        let char = smWord[i];
+                        let box = document.createElement('div');
+                        if (char === " " || char === "-") {
+                            box.style.border = "none"; box.style.width = "20px"; box.innerText = char === "-" ? "-" : "";
+                        } else {
+                            box.className = "letter-box";
+                            box.innerText = char;
+                            box.style.color = "#e74c3c"; // تلوين بالأحمر ليعرف أنه خسره
+                            box.style.borderColor = "#e74c3c";
+                        }
+                        display.appendChild(box);
+                    }
+
+                    // الانتقال الإجباري للسؤال التالي بعد ثانيتين
                     setTimeout(() => {
-                        alert("❌ نفد الأكسجين تماماً!\nالإجابة الصحيحة كانت: ( " + smWord.toUpperCase() + " )\nسنقوم بإعادة تعبئة الأكسجين لتعيد المحاولة.");
+                        smCurrentIndex++;
                         loadSpacemanWord(); 
-                    }, 500);
+                    }, 2500);
                 }
             }
         }
@@ -803,13 +839,13 @@
             else bar.style.background = "#e74c3c"; 
         }
 
-        // --- دالة الإرسال المشتركة المخصصة للألعاب ---
+        // --- دالة الإرسال وحساب النتيجة النهائية للألعاب ---
         function submitGameSuccess() {
             // تجهيز مصفوفة الإجابات المفصلة بناءً على الأخطاء التي تم رصدها
             let answersPayload = currentQuestions.map((q, index) => {
                 let failed = gameMistakes[index];
                 return {
-                    question: q.word || q.question, // دعم للمسميات المختلفة
+                    question: q.word || q.question, 
                     answer: failed ? "أخطأ قبل الوصول للإجابة" : (q.def || "إجابة صحيحة"),
                     correctAnswer: q.def,
                     isCorrect: !failed // تعيين الصح والخطأ
