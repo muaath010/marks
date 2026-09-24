@@ -98,27 +98,16 @@
         .alert-box { padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; display: none; }
         .alert-error { background-color: #fadbd8; color: #c0392b; border: 1px solid #f1948a; }
 
-        /* --- تصميم لعبة المطابقة التفاعلية --- */
-        .matching-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px; margin-top: 20px;
-        }
-        .match-card {
-            background: #ecf0f1; border: 2px solid #bdc3c7; color: #2c3e50;
-            padding: 20px 10px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex; justify-content: center; align-items: center; min-height: 80px; text-align: center;
-        }
+        /* --- تصميم الألعاب التفاعلية --- */
+        .matching-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .match-card { background: #ecf0f1; border: 2px solid #bdc3c7; color: #2c3e50; padding: 20px 10px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; transition: all 0.3s; display: flex; justify-content: center; align-items: center; min-height: 80px; text-align: center; }
         .match-card:hover { transform: translateY(-5px); border-color: #3498db; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2); }
         .match-card.selected { background: #f1c40f; border-color: #f39c12; color: #fff; transform: scale(1.05); }
         .match-card.matched { background: #27ae60; border-color: #2ecc71; color: #fff; transform: scale(0.9); opacity: 0.6; pointer-events: none; }
-        
-        /* تأثير البطاقة الخاطئة المقفلة (التقييم الصارم) */
         .match-card.wrong-locked { background: #e74c3c !important; border-color: #c0392b !important; color: #fff !important; transform: scale(0.9); opacity: 0.7; pointer-events: none; }
         .match-card.wrong { background: #e74c3c; border-color: #c0392b; color: #fff; animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
 
-        /* --- تصميم لعبة الفرز (Group Sorting) --- */
         .sorting-layout { display: flex; flex-direction: column; gap: 20px; margin-top: 20px;}
         .items-pool { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #eaf2f8; padding: 20px; border-radius: 12px; border: 2px dashed #3498db; min-height: 50px; }
         .sort-item { background: #3498db; color: white; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; user-select: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -128,7 +117,6 @@
         .sort-box:hover { border-color: #2ecc71; background: #f9fffb; }
         .box-title { font-weight: bold; color: #2c3e50; text-align: center; margin-bottom: 10px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; width: 100%; font-size: 18px; }
 
-        /* --- تصميم لعبة الترتيب المنطقي (Sequence) --- */
         .sequence-layout { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; text-align: right;}
         .seq-pool { display: flex; flex-direction: column; gap: 10px; background: #eaf2f8; padding: 20px; border-radius: 12px; border: 2px dashed #3498db; min-height: 60px; }
         .seq-slots { display: flex; flex-direction: column; gap: 10px; counter-reset: seq-counter; }
@@ -138,7 +126,6 @@
         .seq-slot::before { counter-increment: seq-counter; content: counter(seq-counter); position: absolute; right: -15px; top: 50%; transform: translateY(-50%); background: #f39c12; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;}
         .seq-slot .seq-item { margin: 0; width: 100%; box-sizing: border-box; background: #2c3e50; }
         
-        /* --- تصميم لعبة إنقاذ رائد الفضاء (Spaceman) --- */
         .spaceman-layout { text-align: center; margin-top: 20px; }
         .oxygen-container { background: #ecf0f1; border-radius: 20px; width: 100%; height: 35px; border: 3px solid #bdc3c7; margin-bottom: 25px; overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
         .oxygen-bar { background: #3498db; width: 100%; height: 100%; transition: width 0.4s ease, background-color 0.4s ease; }
@@ -211,9 +198,7 @@
             <h1 id="display-quiz-name">عنوان الاختبار</h1>
             <p>الطالب: <span id="display-student-name" style="font-weight:bold; color:var(--primary-color);"></span> | الصف: <span id="display-student-class" style="font-weight:bold; color:#34495e;"></span></p>
         </div>
-
         <div id="questions-wrapper"></div>
-
         <button class="btn-success" id="btn-submit" onclick="submitAnswers()">📤 تسليم الإجابات النهائية</button>
         <div id="submit-loading" style="display:none; text-align:center; font-weight:bold; margin-top:15px; color:#27ae60; font-size: 16px;">⏳ جاري إرسال الإجابات للمعلم بأمان...</div>
     </div>
@@ -236,7 +221,6 @@
     </div>
 
     <script>
-        // 🚨 حماية الصفحة من الغش 🚨
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(event) {
             if (event.ctrlKey && ['c', 'v', 'x', 'a', 'C', 'V', 'X', 'A'].includes(event.key)) { event.preventDefault(); }
@@ -252,19 +236,16 @@
         let currentQuestions = [];
         let studentsDirectory = {};
         let cheatCount = 0;
-        
-        // نظام تتبع الأخطاء في الألعاب (التقييم الصارم)
         let gameMistakes = {}; 
 
         window.addEventListener("blur", () => {
             if (document.getElementById('quiz-section').style.display === 'block') {
                 cheatCount++;
-                let maxAttempts = 3;
-                let remaining = maxAttempts - cheatCount;
+                let remaining = 3 - cheatCount;
                 if (remaining > 0) {
-                    alert(`🚨 تحذير شديد: لقد قمت بالخروج من شاشة الاختبار أو فتح نافذة/تطبيق آخر!\n\nتم تسجيل هذه المحاولة كحالة غش (رقم ${cheatCount}).\n⚠️ تبقى لك (${remaining}) محاولات قبل أن يتم سحب الاختبار وتسليمه تلقائياً!`);
+                    alert(`🚨 تحذير: الخروج من الشاشة يُعد محاولة غش (رقم ${cheatCount}). تبقى لك (${remaining}) محاولات.`);
                 } else {
-                    alert("⛔ تم استنفاد جميع المحاولات! سيتم سحب الاختبار وتسليم إجاباتك الحالية تلقائياً.");
+                    alert("⛔ تم استنفاد المحاولات! سيتم تسليم إجاباتك تلقائياً.");
                     submitAnswers();
                 }
             }
@@ -281,6 +262,11 @@
             const code = document.getElementById('quizCode').value.trim().toUpperCase();
             if (!code) return showAlert("الرجاء إدخال رمز الاختبار.");
 
+            // 🛑 التحقق من ذاكرة المتصفح لمنع الدخول المتكرر
+            if (localStorage.getItem('completed_quiz_' + code)) {
+                return showAlert("⛔ لقد قمت بتسليم إجاباتك لهذا النشاط مسبقاً ولا يُسمح بالدخول مرة أخرى.");
+            }
+
             document.getElementById('btn-check-code').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
 
@@ -294,13 +280,13 @@
                     } else {
                         document.getElementById('loading').style.display = 'none';
                         document.getElementById('btn-check-code').style.display = 'block';
-                        showAlert(data.message || "عذراً، الكود غير صحيح أو الاختبار غير متاح.");
+                        showAlert(data.message || "الكود غير صحيح.");
                     }
                 })
                 .catch(error => {
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('btn-check-code').style.display = 'block';
-                    showAlert("حدث خطأ في الاتصال. تأكد من الإنترنت وحاول مجدداً.");
+                    showAlert("حدث خطأ في الاتصال.");
                 });
         }
 
@@ -317,13 +303,13 @@
                         populateGrades();
                     } else {
                         document.getElementById('btn-check-code').style.display = 'block';
-                        showAlert("الاختبار موجود، لكن لا توجد أسماء طلاب مسجلة لهذا المعلم.");
+                        showAlert("لا توجد أسماء طلاب مسجلة لهذا المعلم.");
                     }
                 })
                 .catch(e => {
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('btn-check-code').style.display = 'block';
-                    showAlert("حدث خطأ أثناء جلب أسماء الطلاب.");
+                    showAlert("حدث خطأ أثناء جلب الأسماء.");
                 });
         }
 
@@ -365,17 +351,13 @@
             const selName = document.getElementById('selStudentName').value;
             const selGrade = document.getElementById('selGrade').value;
             const selSection = document.getElementById('selSection').value;
-            if(!selName) return showAlert("الرجاء اختيار اسمك من القائمة للبدء.");
+            if(!selName) return showAlert("الرجاء اختيار اسمك للبدء.");
 
             document.getElementById('login-section').style.display = 'none';
-
             let quizCode = document.getElementById('quizCode').value.trim().toUpperCase();
             
-            // التأكد من دعم الألعاب
             if (quizCode.startsWith('G-')) {
-                // تصفير الأخطاء عند بدء اللعبة
                 gameMistakes = {};
-                
                 let gameType = (currentQuestions && currentQuestions[0] && currentQuestions[0].type) ? currentQuestions[0].type : 'matching'; 
                 let title = document.getElementById('fetchedQuizName').innerText;
                 
@@ -383,14 +365,10 @@
                 else if (gameType === 'sorting') { startSortingGame(title, currentQuestions); } 
                 else if (gameType === 'sequence') { startSequenceGame(title, currentQuestions); } 
                 else if (gameType === 'spaceman') { startSpacemanGame(title, currentQuestions); } 
-                else {
-                    alert("⏳ هذا القالب من الألعاب قيد البرمجة وسيتم إطلاقه قريباً!");
-                    location.reload();
-                }
+                else { alert("القالب غير مدعوم حالياً!"); location.reload(); }
                 return;
             }
             
-            // الاختبار العادي
             document.getElementById('quiz-section').style.display = 'block';
             document.getElementById('display-quiz-name').innerText = document.getElementById('fetchedQuizName').innerText;
             document.getElementById('display-student-name').innerText = selName;
@@ -398,7 +376,6 @@
 
             const wrapper = document.getElementById('questions-wrapper');
             wrapper.innerHTML = "";
-
             currentQuestions.forEach((q, index) => {
                 let questionHTML = `<div class="question-card"><div class="question-title">${index + 1}. ${q.question}</div>`;
                 if (q.type === 'mcq') {
@@ -408,26 +385,19 @@
                     });
                     questionHTML += `</div>`;
                 } 
-                else if (q.type === 'long') {
-                    questionHTML += `<textarea id="q_${index}" rows="4" placeholder="اكتب إجابتك هنا بتفصيل..."></textarea>`;
-                } 
-                else {
-                    questionHTML += `<input type="text" id="q_${index}" placeholder="إجابة قصيرة...">`;
-                }
+                else if (q.type === 'long') { questionHTML += `<textarea id="q_${index}" rows="4" placeholder="اكتب إجابتك هنا بتفصيل..."></textarea>`; } 
+                else { questionHTML += `<input type="text" id="q_${index}" placeholder="إجابة قصيرة...">`; }
                 questionHTML += `</div>`;
                 wrapper.innerHTML += questionHTML;
             });
         }
 
-        // إرسال إجابات الاختبار العادي
         function submitAnswers() {
             let answers = [];
             let allAnswered = true;
-
             for (let i = 0; i < currentQuestions.length; i++) {
                 let qType = currentQuestions[i].type;
                 let studentAnswer = "";
-
                 if (qType === 'mcq') {
                     let selected = document.querySelector(`input[name="q_${i}"]:checked`);
                     if (selected) studentAnswer = selected.value;
@@ -435,17 +405,13 @@
                     let inputField = document.getElementById(`q_${i}`);
                     if (inputField) studentAnswer = inputField.value.trim();
                 }
-
                 if (!studentAnswer) allAnswered = false;
                 answers.push({ question: currentQuestions[i].question, answer: studentAnswer || "لم يجب" });
             }
-
-            if (!allAnswered && !confirm("⚠️ توجد أسئلة لم تقم بالإجابة عليها! هل أنت متأكد من رغبتك في التسليم؟")) return;
-
+            if (!allAnswered && !confirm("⚠️ توجد أسئلة لم تُجب عليها! هل أنت متأكد من التسليم؟")) return;
             sendPayloadToCloud(answers, cheatCount, false);
         }
 
-        // --- دوال الألعاب التفاعلية مع نظام التقييم الصارم ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(freq, type, duration) {
             if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -456,25 +422,20 @@
             osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
 
-        // 1. لعبة المطابقة الصارمة
         let firstCard = null; let matchedCount = 0; let totalPairs = 0;
-
         function startMatchingGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "🧩 " + title;
             document.getElementById('gameSubtitle').innerText = "لعبة المطابقة (تُحسب النتيجة من المحاولة الأولى)";
-
             let cardsArray = []; totalPairs = items.length; matchedCount = 0;
             items.forEach((item, index) => {
                 cardsArray.push({ text: item.word, id: index, type: 'word' });
                 cardsArray.push({ text: item.def, id: index, type: 'def' });
             });
             cardsArray = cardsArray.sort(() => Math.random() - 0.5);
-
             const gameArea = document.getElementById('gameArea');
             gameArea.innerHTML = "";
-            
             cardsArray.forEach((card) => {
                 let div = document.createElement('div');
                 div.className = 'match-card'; div.innerText = card.text;
@@ -486,174 +447,100 @@
         }
 
         function handleCardClick(card) {
-            // منع النقر على البطاقات المقفلة أو المفتوحة مسبقاً
             if(card.classList.contains('matched') || card.classList.contains('selected') || card.classList.contains('wrong-locked')) return;
             card.classList.add('selected'); playSound(800, 'sine', 0.1);
-
-            if(!firstCard) {
-                firstCard = card;
-            } else {
+            if(!firstCard) { firstCard = card; } 
+            else {
                 let secondCard = card;
                 if(firstCard.dataset.id === secondCard.dataset.id && firstCard.dataset.type !== secondCard.dataset.type) {
-                    // مطابقة صحيحة
                     firstCard.classList.replace('selected', 'matched');
                     secondCard.classList.replace('selected', 'matched');
                     playSound(1200, 'sine', 0.2); 
                     firstCard = null; matchedCount++;
-                    if(matchedCount === totalPairs) {
-                       setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 1000);
-                    }
+                    if(matchedCount === totalPairs) { setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 1000); }
                 } else {
-                    // مطابقة خاطئة (التقييم الصارم - إقفال البطاقة)
-                    gameMistakes[firstCard.dataset.id] = true; // تسجيل الخطأ في النظام
-                    
-                    firstCard.classList.replace('selected', 'wrong-locked'); // قفل البطاقة الأولى كخطأ
-                    secondCard.classList.add('wrong'); // تأثير الاهتزاز للبطاقة الثانية
+                    gameMistakes[firstCard.dataset.id] = true; 
+                    firstCard.classList.replace('selected', 'wrong-locked'); 
+                    secondCard.classList.add('wrong'); 
                     playSound(150, 'sawtooth', 0.3);
-                    
-                    // البحث عن الإجابة الحقيقية للبطاقة الأولى وقفلها أيضاً لمنع الأخطاء البرمجية
                     let trueMatchType = firstCard.dataset.type === 'word' ? 'def' : 'word';
                     let trueMatch = document.querySelector(`.match-card[data-id="${firstCard.dataset.id}"][data-type="${trueMatchType}"]`);
-                    
                     setTimeout(() => {
-                        secondCard.classList.remove('selected', 'wrong'); // إعادة البطاقة الثانية للعب
-                        if (trueMatch) {
-                            trueMatch.classList.add('wrong-locked'); // قفل إجابتها الحقيقية
-                        }
-                        firstCard = null;
-                        matchedCount++;
-                        if(matchedCount === totalPairs) {
-                           setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 1000);
-                        }
+                        secondCard.classList.remove('selected', 'wrong'); 
+                        if (trueMatch) { trueMatch.classList.add('wrong-locked'); }
+                        firstCard = null; matchedCount++;
+                        if(matchedCount === totalPairs) { setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 1000); }
                     }, 800);
                 }
             }
         }
 
-        // 2. لعبة الفرز الصارمة
         function startSortingGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "🗂️ " + title;
             document.getElementById('gameSubtitle').innerText = "لعبة الفرز والتصنيف (الخطأ يُحسب فوراً)";
-
             const gameArea = document.getElementById('gameArea');
             gameArea.innerHTML = `
                 <div style="color:#7f8c8d; font-weight:bold; margin-bottom:10px; text-align:center;">👈 اضغط على المصطلح، ثم اختر الصندوق. (لا يمكنك التراجع!)</div>
-                <div class="sorting-layout">
-                    <div class="items-pool" id="itemsPool"></div>
-                    <div class="boxes-container" id="boxesContainer"></div>
-                </div>
+                <div class="sorting-layout"><div class="items-pool" id="itemsPool"></div><div class="boxes-container" id="boxesContainer"></div></div>
             `;
-
             let pool = document.getElementById('itemsPool');
             let boxes = document.getElementById('boxesContainer');
             let selectedWordElem = null;
             let sortedCount = 0;
-
             let words = [...items].sort(() => Math.random() - 0.5); 
             words.forEach(w => {
-                let el = document.createElement('div');
-                el.className = 'sort-item';
-                el.innerText = w.word;
-                el.dataset.def = w.def; 
+                let el = document.createElement('div'); el.className = 'sort-item'; el.innerText = w.word; el.dataset.def = w.def; 
                 el.dataset.originalIndex = items.findIndex(item => item.word === w.word && item.def === w.def);
-                
                 el.onclick = () => {
                     if(selectedWordElem) selectedWordElem.classList.remove('selected-item');
-                    selectedWordElem = el;
-                    el.classList.add('selected-item');
-                    playSound(800, 'sine', 0.1);
+                    selectedWordElem = el; el.classList.add('selected-item'); playSound(800, 'sine', 0.1);
                 };
                 pool.appendChild(el);
             });
-
             let defs = [...items].sort(() => Math.random() - 0.5);
             defs.forEach(d => {
-                let box = document.createElement('div');
-                box.className = 'sort-box';
-                box.innerHTML = `<div class="box-title">${d.def}</div>`;
-                
+                let box = document.createElement('div'); box.className = 'sort-box'; box.innerHTML = `<div class="box-title">${d.def}</div>`;
                 box.onclick = () => {
                     if(!selectedWordElem) return;
-
-                    sortedCount++; // زيادة عداد المحاولات المنتهية
-
+                    sortedCount++; 
                     if(selectedWordElem.dataset.def === d.def) {
-                        // إجابة صحيحة
-                        selectedWordElem.classList.remove('selected-item');
-                        selectedWordElem.style.background = '#27ae60'; 
-                        selectedWordElem.onclick = null; // قفل العنصر
-                        box.appendChild(selectedWordElem); 
-                        selectedWordElem = null;
-                        playSound(1200, 'sine', 0.2);
+                        selectedWordElem.classList.remove('selected-item'); selectedWordElem.style.background = '#27ae60'; 
+                        selectedWordElem.onclick = null; box.appendChild(selectedWordElem); selectedWordElem = null; playSound(1200, 'sine', 0.2);
                     } else {
-                        // إجابة خاطئة (التقييم الصارم - يُقفل باللون الأحمر في الصندوق الخاطئ)
                         gameMistakes[selectedWordElem.dataset.originalIndex] = true;
-                        
-                        selectedWordElem.classList.remove('selected-item');
-                        selectedWordElem.style.background = '#e74c3c'; // أحمر
-                        selectedWordElem.onclick = null; // قفل العنصر نهائياً
-                        box.appendChild(selectedWordElem); 
-                        selectedWordElem = null;
-                        playSound(150, 'sawtooth', 0.3);
+                        selectedWordElem.classList.remove('selected-item'); selectedWordElem.style.background = '#e74c3c'; 
+                        selectedWordElem.onclick = null; box.appendChild(selectedWordElem); selectedWordElem = null; playSound(150, 'sawtooth', 0.3);
                     }
-                    
-                    if(sortedCount === items.length) {
-                        setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 1000);
-                    }
+                    if(sortedCount === items.length) { setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 1000); }
                 };
                 boxes.appendChild(box);
             });
             playSound(600, 'triangle', 0.1);
         }
 
-        // 3. لعبة الترتيب الصارمة
         function startSequenceGame(title, items) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('game-section').style.display = 'block';
             document.getElementById('gameTitle').innerText = "🔢 " + title;
             document.getElementById('gameSubtitle').innerText = "لعبة الترتيب المنطقي (التحقق لمرة واحدة فقط)";
-
             const gameArea = document.getElementById('gameArea');
             gameArea.innerHTML = `
                 <div style="color:#7f8c8d; font-weight:bold; margin-bottom:10px; text-align:center;">👈 رتب الخطوات، ثم اضغط على زر التحقق. (لديك محاولة واحدة فقط!)</div>
-                <div class="sequence-layout">
-                    <div class="seq-pool" id="seqPool"></div>
-                    <div class="seq-slots" id="seqSlots"></div>
-                </div>
+                <div class="sequence-layout"><div class="seq-pool" id="seqPool"></div><div class="seq-slots" id="seqSlots"></div></div>
                 <button id="btnCheckSeq" onclick="checkSequence()" style="display:none; background:#8e44ad; color:white; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:18px; cursor:pointer; width:100%; margin-top:20px; box-shadow:0 4px 10px rgba(142, 68, 173, 0.3);">تحقق من الترتيب النهائي ✅</button>
             `;
-
-            let pool = document.getElementById('seqPool');
-            let slotsContainer = document.getElementById('seqSlots');
-
-            items.forEach((_, i) => {
-                let slot = document.createElement('div');
-                slot.className = 'seq-slot';
-                slotsContainer.appendChild(slot);
-            });
-
+            let pool = document.getElementById('seqPool'); let slotsContainer = document.getElementById('seqSlots');
+            items.forEach((_, i) => { let slot = document.createElement('div'); slot.className = 'seq-slot'; slotsContainer.appendChild(slot); });
             let shuffled = items.map((item, index) => ({ text: item.word + " : " + item.def, originalIndex: index })).sort(() => Math.random() - 0.5);
-
             shuffled.forEach(item => {
-                let el = document.createElement('div');
-                el.className = 'seq-item';
-                el.innerText = item.text;
-                el.dataset.correctIndex = item.originalIndex;
-                
+                let el = document.createElement('div'); el.className = 'seq-item'; el.innerText = item.text; el.dataset.correctIndex = item.originalIndex;
                 el.onclick = function() {
-                    let slots = document.querySelectorAll('.seq-slot');
-                    playSound(800, 'sine', 0.1);
-                    
+                    let slots = document.querySelectorAll('.seq-slot'); playSound(800, 'sine', 0.1);
                     if(this.parentElement === pool) {
-                        for(let slot of slots) {
-                            if(slot.children.length === 0) { slot.appendChild(this); break; }
-                        }
-                    } else {
-                        pool.appendChild(this);
-                    }
-                    
+                        for(let slot of slots) { if(slot.children.length === 0) { slot.appendChild(this); break; } }
+                    } else { pool.appendChild(this); }
                     let allFilled = Array.from(slots).every(slot => slot.children.length > 0);
                     document.getElementById('btnCheckSeq').style.display = allFilled ? 'block' : 'none';
                 };
@@ -663,204 +550,98 @@
         }
 
         window.checkSequence = function() {
-            let slots = document.querySelectorAll('.seq-slot');
-            let isWin = true;
-
-            // إخفاء الزر لعدم السماح بالتعديل
+            let slots = document.querySelectorAll('.seq-slot'); let isWin = true;
             document.getElementById('btnCheckSeq').style.display = 'none';
-
             slots.forEach((slot, index) => {
                 let item = slot.children[0];
-                if(parseInt(item.dataset.correctIndex) === index) {
-                    item.style.background = '#27ae60'; 
-                    item.onclick = null; // قفل العنصر
-                } else {
-                    isWin = false;
-                    gameMistakes[item.dataset.correctIndex] = true; // تسجيل الخطأ
-                    item.style.background = '#e74c3c'; // تلوين بالأحمر
-                    item.onclick = null; // قفل العنصر
-                }
+                if(parseInt(item.dataset.correctIndex) === index) { item.style.background = '#27ae60'; item.onclick = null; } 
+                else { isWin = false; gameMistakes[item.dataset.correctIndex] = true; item.style.background = '#e74c3c'; item.onclick = null; }
             });
-
-            if(isWin) playSound(1200, 'sine', 0.2);
-            else playSound(150, 'sawtooth', 0.3);
-            
-            // إنهاء اللعبة فوراً وإرسال النتيجة بعد ثانية ونصف
+            if(isWin) playSound(1200, 'sine', 0.2); else playSound(150, 'sawtooth', 0.3);
             setTimeout(() => { submitGameSuccess(); }, 1500);
         };
 
-        // 4. رائد الفضاء الصارمة
-        let smItems = [];
-        let smCurrentIndex = 0;
-        let smWord = "";
-        let smGuessed = [];
-        let smWrongCount = 0;
-        const smMaxWrong = 6; 
-
+        let smItems = []; let smCurrentIndex = 0; let smWord = ""; let smGuessed = []; let smWrongCount = 0; const smMaxWrong = 6; 
         function startSpacemanGame(title, items) {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('game-section').style.display = 'block';
-            document.getElementById('gameTitle').innerText = "👨‍🚀 " + title;
-            document.getElementById('gameSubtitle').innerText = "إنقاذ رائد الفضاء (نفاد الأكسجين يعني ضياع السؤال)";
-            
-            smItems = items;
-            smCurrentIndex = 0;
-            loadSpacemanWord();
+            document.getElementById('login-section').style.display = 'none'; document.getElementById('game-section').style.display = 'block';
+            document.getElementById('gameTitle').innerText = "👨‍🚀 " + title; document.getElementById('gameSubtitle').innerText = "إنقاذ رائد الفضاء (نفاد الأكسجين يعني ضياع السؤال)";
+            smItems = items; smCurrentIndex = 0; loadSpacemanWord();
         }
 
         function loadSpacemanWord() {
-            if (smCurrentIndex >= smItems.length) {
-                setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 500);
-                return;
-            }
-            
-            smWord = smItems[smCurrentIndex].word.trim().toLowerCase();
-            let def = smItems[smCurrentIndex].def;
-            smGuessed = [];
-            smWrongCount = 0;
-            
+            if (smCurrentIndex >= smItems.length) { setTimeout(() => { playSound(500, 'triangle', 0.5); submitGameSuccess(); }, 500); return; }
+            smWord = smItems[smCurrentIndex].word.trim().toLowerCase(); let def = smItems[smCurrentIndex].def; smGuessed = []; smWrongCount = 0;
             const gameArea = document.getElementById('gameArea');
             gameArea.innerHTML = `
                 <div class="spaceman-layout">
                     <div class="hint-box">💡 <b>تلميح:</b> ${def}</div>
-                    <div class="oxygen-container">
-                        <div class="oxygen-bar" id="oxygenBar"></div>
-                        <div class="oxygen-text" id="oxygenText">مستوى الأكسجين: 100%</div>
-                    </div>
-                    <div class="word-display" id="wordDisplay"></div>
-                    <div class="keyboard" id="keyboard"></div>
-                    <div style="font-weight:bold; color:#7f8c8d; margin-top:20px; font-size:14px;">
-                        السؤال ( ${smCurrentIndex + 1} ) من أصل ( ${smItems.length} )
-                    </div>
+                    <div class="oxygen-container"><div class="oxygen-bar" id="oxygenBar"></div><div class="oxygen-text" id="oxygenText">مستوى الأكسجين: 100%</div></div>
+                    <div class="word-display" id="wordDisplay"></div><div class="keyboard" id="keyboard"></div>
+                    <div style="font-weight:bold; color:#7f8c8d; margin-top:20px; font-size:14px;">السؤال ( ${smCurrentIndex + 1} ) من أصل ( ${smItems.length} )</div>
                 </div>
             `;
-            
-            updateSpacemanDisplay();
-            buildKeyboard();
-            updateOxygen();
-            playSound(600, 'triangle', 0.1);
+            updateSpacemanDisplay(); buildKeyboard(); updateOxygen(); playSound(600, 'triangle', 0.1);
         }
 
         function updateSpacemanDisplay() {
-            const display = document.getElementById('wordDisplay');
-            display.innerHTML = "";
-            let allGuessed = true;
-            
+            const display = document.getElementById('wordDisplay'); display.innerHTML = ""; let allGuessed = true;
             for (let i = 0; i < smWord.length; i++) {
-                let char = smWord[i];
-                let box = document.createElement('div');
-                
-                if (char === " " || char === "-") {
-                    box.style.border = "none";
-                    box.style.width = "20px";
-                    box.innerText = char === "-" ? "-" : "";
-                } else {
-                    box.className = "letter-box";
-                    if (smGuessed.includes(char)) { box.innerText = char; } 
-                    else { box.innerText = ""; allGuessed = false; }
-                }
+                let char = smWord[i]; let box = document.createElement('div');
+                if (char === " " || char === "-") { box.style.border = "none"; box.style.width = "20px"; box.innerText = char === "-" ? "-" : ""; } 
+                else { box.className = "letter-box"; if (smGuessed.includes(char)) { box.innerText = char; } else { box.innerText = ""; allGuessed = false; } }
                 display.appendChild(box);
             }
-            
             if (allGuessed) {
-                playSound(1200, 'sine', 0.2);
-                document.getElementById('keyboard').style.pointerEvents = "none";
-                setTimeout(() => {
-                    smCurrentIndex++;
-                    loadSpacemanWord(); // الانتقال للسؤال التالي بنجاح
-                }, 1500);
+                playSound(1200, 'sine', 0.2); document.getElementById('keyboard').style.pointerEvents = "none";
+                setTimeout(() => { smCurrentIndex++; loadSpacemanWord(); }, 1500);
             }
         }
 
         function buildKeyboard() {
-            const kb = document.getElementById('keyboard');
-            let lettersArray = "ابتثجحخدذرزسشصضطظعغفقكلمنهويأإآؤئءةى".split("");
+            const kb = document.getElementById('keyboard'); let lettersArray = "ابتثجحخدذرزسشصضطظعغفقكلمنهويأإآؤئءةى".split("");
             if (/[a-z]/.test(smWord)) lettersArray = lettersArray.concat("abcdefghijklmnopqrstuvwxyz".split(""));
-            
             lettersArray.forEach(l => {
-                let btn = document.createElement('button');
-                btn.className = "key-btn"; btn.innerText = l;
-                btn.onclick = () => handleSpacemanGuess(l, btn);
-                kb.appendChild(btn);
+                let btn = document.createElement('button'); btn.className = "key-btn"; btn.innerText = l;
+                btn.onclick = () => handleSpacemanGuess(l, btn); kb.appendChild(btn);
             });
         }
 
         function handleSpacemanGuess(letter, btn) {
             if (smWord.includes(letter)) {
-                smGuessed.push(letter);
-                btn.classList.add('correct');
-                playSound(800, 'sine', 0.1);
-                updateSpacemanDisplay();
+                smGuessed.push(letter); btn.classList.add('correct'); playSound(800, 'sine', 0.1); updateSpacemanDisplay();
             } else {
-                smWrongCount++;
-                btn.classList.add('wrong');
-                playSound(150, 'sawtooth', 0.3);
-                updateOxygen();
-                
+                smWrongCount++; btn.classList.add('wrong'); playSound(150, 'sawtooth', 0.3); updateOxygen();
                 if (smWrongCount >= smMaxWrong) {
-                    // تسجيل الخطأ للطالب وعدم إعطائه فرصة الإعادة
-                    gameMistakes[smCurrentIndex] = true;
-                    document.getElementById('keyboard').style.pointerEvents = "none";
-                    
-                    // كشف الإجابة الصحيحة باللون الأحمر
-                    const display = document.getElementById('wordDisplay');
-                    display.innerHTML = "";
+                    gameMistakes[smCurrentIndex] = true; document.getElementById('keyboard').style.pointerEvents = "none";
+                    const display = document.getElementById('wordDisplay'); display.innerHTML = "";
                     for (let i = 0; i < smWord.length; i++) {
-                        let char = smWord[i];
-                        let box = document.createElement('div');
-                        if (char === " " || char === "-") {
-                            box.style.border = "none"; box.style.width = "20px"; box.innerText = char === "-" ? "-" : "";
-                        } else {
-                            box.className = "letter-box";
-                            box.innerText = char;
-                            box.style.color = "#e74c3c"; // تلوين بالأحمر ليعرف أنه خسره
-                            box.style.borderColor = "#e74c3c";
-                        }
+                        let char = smWord[i]; let box = document.createElement('div');
+                        if (char === " " || char === "-") { box.style.border = "none"; box.style.width = "20px"; box.innerText = char === "-" ? "-" : ""; } 
+                        else { box.className = "letter-box"; box.innerText = char; box.style.color = "#e74c3c"; box.style.borderColor = "#e74c3c"; }
                         display.appendChild(box);
                     }
-
-                    // الانتقال الإجباري للسؤال التالي بعد ثانيتين
-                    setTimeout(() => {
-                        smCurrentIndex++;
-                        loadSpacemanWord(); 
-                    }, 2500);
+                    setTimeout(() => { smCurrentIndex++; loadSpacemanWord(); }, 2500);
                 }
             }
         }
 
         function updateOxygen() {
             let oxygenPercent = Math.max(0, 100 - (smWrongCount * (100 / smMaxWrong)));
-            const bar = document.getElementById('oxygenBar');
-            document.getElementById('oxygenText').innerText = `مستوى الأكسجين: ${Math.round(oxygenPercent)}%`;
+            const bar = document.getElementById('oxygenBar'); document.getElementById('oxygenText').innerText = `مستوى الأكسجين: ${Math.round(oxygenPercent)}%`;
             bar.style.width = oxygenPercent + "%";
-            
-            if (oxygenPercent > 50) bar.style.background = "#3498db"; 
-            else if (oxygenPercent > 20) bar.style.background = "#f39c12"; 
-            else bar.style.background = "#e74c3c"; 
+            if (oxygenPercent > 50) bar.style.background = "#3498db"; else if (oxygenPercent > 20) bar.style.background = "#f39c12"; else bar.style.background = "#e74c3c"; 
         }
 
-        // --- دالة الإرسال وحساب النتيجة النهائية للألعاب ---
         function submitGameSuccess() {
-            // تجهيز مصفوفة الإجابات المفصلة بناءً على الأخطاء التي تم رصدها
             let answersPayload = currentQuestions.map((q, index) => {
                 let failed = gameMistakes[index];
-                return {
-                    question: q.word || q.question, 
-                    answer: failed ? "أخطأ قبل الوصول للإجابة" : (q.def || "إجابة صحيحة"),
-                    correctAnswer: q.def,
-                    isCorrect: !failed // تعيين الصح والخطأ
-                };
+                return { question: q.word || q.question, answer: failed ? "إجابة خاطئة" : (q.def || "إجابة صحيحة"), correctAnswer: q.def, isCorrect: !failed };
             });
-
-            // حساب النتيجة لعرضها للطالب
-            let score = currentQuestions.length - Object.keys(gameMistakes).length;
-            let total = currentQuestions.length;
+            let score = currentQuestions.length - Object.keys(gameMistakes).length; let total = currentQuestions.length;
             document.getElementById('success-score').innerText = `النتيجة النهائية: ${score} من ${total}`;
-
             sendPayloadToCloud(answersPayload, 0, true);
         }
 
-        // دالة الإرسال النهائية للسيرفر
         function sendPayloadToCloud(answersData, cheatCountVal, isGame) {
             const payload = {
                 action: "submit",
@@ -872,24 +653,17 @@
                 answers: answersData
             };
 
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            })
+            fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
             .then(response => response.json())
             .then(data => {
-                if(isGame) document.getElementById('game-section').style.display = 'none';
-                else document.getElementById('quiz-section').style.display = 'none';
-                
+                // ✅ تسجيل الكود في ذاكرة المتصفح لمنع الدخول مجدداً بعد التسليم الناجح
+                localStorage.setItem('completed_quiz_' + document.getElementById('quizCode').value.toUpperCase(), 'true');
+                if(isGame) document.getElementById('game-section').style.display = 'none'; else document.getElementById('quiz-section').style.display = 'none';
                 document.getElementById('success-section').style.display = 'block';
             })
             .catch(error => {
                 alert("حدث خطأ أثناء إرسال الإجابات. تأكد من اتصالك بالإنترنت.");
-                if(!isGame) {
-                    document.getElementById('btn-submit').style.display = 'block';
-                    document.getElementById('submit-loading').style.display = 'none';
-                }
+                if(!isGame) { document.getElementById('btn-submit').style.display = 'block'; document.getElementById('submit-loading').style.display = 'none'; }
             });
         }
     </script>
