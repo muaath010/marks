@@ -270,7 +270,7 @@
             document.getElementById('btn-check-code').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
 
-            fetch(`${SCRIPT_URL}?action=get_quiz&quizId=${code}`)
+           fetch(`${SCRIPT_URL}?action=get_quiz&quizId=${code}&t=${new Date().getTime()}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === "success") {
