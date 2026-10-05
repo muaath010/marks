@@ -347,6 +347,7 @@
             });
         }
 
+       // دالة بدء الاختبار (مُحدّثة ومحمية بالكامل)
         function startQuizUI() {
             const selName = document.getElementById('selStudentName').value;
             const selGrade = document.getElementById('selGrade').value;
@@ -355,6 +356,9 @@
 
             document.getElementById('login-section').style.display = 'none';
             let quizCode = document.getElementById('quizCode').value.trim().toUpperCase();
+            
+            // 🛑 قفل الاختبار بمجرد الدخول (يمنع المحاولة مرة أخرى حتى لو لم يكمل)
+            localStorage.setItem('locked_quiz_' + quizCode, 'true');
             
             if (quizCode.startsWith('G-')) {
                 gameMistakes = {};
@@ -376,22 +380,34 @@
 
             const wrapper = document.getElementById('questions-wrapper');
             wrapper.innerHTML = "";
+
+            // 🌟 1. خلط ترتيب الأسئلة بالكامل عشوائياً 🌟
+            currentQuestions = shuffleArray(currentQuestions);
+
             currentQuestions.forEach((q, index) => {
                 let questionHTML = `<div class="question-card"><div class="question-title">${index + 1}. ${q.question}</div>`;
+                
                 if (q.type === 'mcq') {
                     questionHTML += `<div class="options-container">`;
-                    q.options.forEach((opt) => {
+                    
+                    // 🌟 2. خلط الخيارات داخل السؤال الاختياري عشوائياً 🌟
+                    let shuffledOptions = shuffleArray([...q.options]);
+                    
+                    shuffledOptions.forEach((opt) => {
                         questionHTML += `<label class="option-label"><input type="radio" name="q_${index}" value="${opt}">${opt}</label>`;
                     });
                     questionHTML += `</div>`;
                 } 
-                else if (q.type === 'long') { questionHTML += `<textarea id="q_${index}" rows="4" placeholder="اكتب إجابتك هنا بتفصيل..."></textarea>`; } 
-                else { questionHTML += `<input type="text" id="q_${index}" placeholder="إجابة قصيرة...">`; }
+                else if (q.type === 'long') { 
+                    questionHTML += `<textarea id="q_${index}" rows="4" placeholder="اكتب إجابتك هنا بتفصيل..."></textarea>`; 
+                } 
+                else { 
+                    questionHTML += `<input type="text" id="q_${index}" placeholder="إجابة قصيرة...">`; 
+                }
                 questionHTML += `</div>`;
                 wrapper.innerHTML += questionHTML;
             });
         }
-
         function submitAnswers() {
             let answers = [];
             let allAnswered = true;
@@ -666,6 +682,16 @@
                 if(!isGame) { document.getElementById('btn-submit').style.display = 'block'; document.getElementById('submit-loading').style.display = 'none'; }
             });
         }
+
+// دالة ذكية لخلط المصفوفات (أسئلة أو خيارات) عشوائياً
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
     </script>
 </body>
 </html>
